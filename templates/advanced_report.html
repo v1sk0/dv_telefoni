@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dolce Vita Phone Inventory Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #f0f0f0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 20px;
+        }
+
+        .container {
+            max-width: fit-content;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            display: inline-block;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+        }
+
+        .sbox {
+            position: relative;
+            float: left;
+            border: 2px solid #003B62;
+            font-family: verdana;
+            background-color: #B5CFE0;
+            padding-left: 10px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <header>
+        <h1>Advanced Sales Report</h1>
+    </header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/sales_report">Izveštaj prodatih Telefona</a>
+        <a href="/add_listing">Dodaj Telefon</a>
+    </nav>
+    <div class="container">
+        <h2>Sold Phones Report</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Purchase Timestamp</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>IMEI</th>
+                    <th>Color</th>
+                    <th>Purchase Price</th>
+                    <th>Sold Price</th>
+                    <th>Transaction Balance</th>
+                    <th>Turnover Time</th>
+                    <th>Sold Timestamp</th>
+                    <th>Supplier Name</th>
+                    <th>Supplier ID Card</th>
+                    <th>Supplier Mobile</th>
+                    <th>Modify Purchase Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for phone in sold_phones %}
+                <tr>
+                    <td>{{ phone.purchase_timestamp.strftime('%H:%M:%S %d-%m-%Y ') }}</td>
+                    <td>{{ phone.brand }}</td>
+                    <td>{{ phone.model }}</td>
+                    <td>{{ phone.imei }}</td>
+                    <td>{{ phone.color }}</td>
+                    <td>{{ phone.purchase_price }}</td>
+                    <td>{{ phone.sales_price }}</td>
+                    <td>{{ phone.sales_price - phone.purchase_price }}</td>
+                    <td>
+                        {% if phone.turnover_time %}
+                        {{ phone.turnover_time.seconds // 3600 }}h {{ (phone.turnover_time.seconds // 60) % 60 }}m
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ phone.sale_timestamp.strftime('%H:%M %d.%m.%Y') if phone.sale_timestamp else '' }}</td>
+                    <td>{{ phone.supplier_name }}</td>
+                    <td>{{ phone.supplier_id_card }}</td>
+                    <td>{{ phone.supplier_mobile }}</td>
+                    <td>
+                        <form method="POST" action="/modify_purchase_price/{{ phone.id }}">
+                            <input type="number" name="purchase_price" placeholder="New Purchase Price" required
+                                step="1">
+                            <input type="submit" value="Modify" class="btn btn-success">
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<div class="container">
+        <h2>Today's Statistics</h2>
+        <p>Total Phones Sold Today: {{ today_count }}</p>
+        <p>Total Sales Amount Today: ${{ today_sum }}</p>
+	<p>Total Profit Today: ${{ today_profit }}</p>
+
+        <h2>This Week's Statistics</h2>
+        <p>Total Phones Sold This Week: {{ this_week_count }}</p>
+        <p>Total Sales Amount This Week: ${{ this_week_sum }}</p>
+	<p>Total Profit This Week: ${{ this_week_profit }}</p>
+
+        <h2>This Month's Statistics</h2>
+        <p>Total Phones Sold This Month: {{ this_month_count }}</p>
+        <p>Total Sales Amount This Month: ${{ this_month_sum }}</p>
+	<p>Total Profit This Month: ${{ this_month_profit }}</p>
+    </div>
+</body>
+
+</html>

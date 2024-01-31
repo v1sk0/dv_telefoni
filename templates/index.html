@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dolce Vita Phone Inventory Management</title>
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #f0f0f0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 20px;
+        }
+
+        .container {
+            max-width: fit-content;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            display: inline-block;
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            margin: 5px;
+        }
+
+        .sbox {
+            position: relative;
+            float: left;
+            border: 2px solid #003B62;
+            font-family: verdana;
+            background-color: #B5CFE0;
+            padding-left: 10px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Dolce Vita Phone Inventory</h1>
+    </header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/sales_report">Izveštaj prodatih Telefona</a>
+        <a href="/add_listing">Dodaj Telefon</a>
+    </nav>
+    <div class="container">
+<div>   <h2 style="display: inline;">Telefoni na lageru : </h2>
+<h2 id="phoneCount" style="display: inline; ;">Total Phones: Loading...</h2>
+<h2 style="display: inline; margin-left: 20px;">Suma Preporučenih Cena: <span id="totalSalesPrice">Calculating...</span></h2>
+</div>
+
+     
+
+
+        <div class="sbox">
+            <label for="search">Pretraži:</label>
+            <input type="text" id="search" onkeyup="filterTable()" placeholder="Enter keywords...">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Datum nabavke</th>
+                    <th>Brend</th>
+                    <th>Model</th>
+                    <th>IMEI</th>
+                    <th>Boja</th>
+                    <th>Kapacitet</th>
+                    <th>Stanje</th>
+                    <th>Komentar</th>
+                    <th>Preporučena prodajna cena</th>
+                    <th>Vreme u prodaji</th>
+                    <th>Prodaj po ceni </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for phone in phone_listings %}
+                <tr
+                    data-search="{{ phone.brand }} {{ phone.model }} {{ phone.imei }} {{ phone.color }} {{ phone.capacity }} {{ phone.condition }} {{ phone.comment }} {{ phone.sales_price }} ">
+                    <td>{{ phone.purchase_timestamp.strftime('%Hh:%Mm %d-%m-%Y ') }}</td>
+                    <td>{{ phone.brand }}</td>
+                    <td>{{ phone.model }}</td>
+                    <td>{{ phone.imei }}</td>
+                    <td>{{ phone.color }}</td>
+                    <td>{{ phone.capacity }}</td>
+                    <td>{{ phone.condition }}</td>
+                    <td>{{ phone.comment }}</td>
+                    <td>{{ phone.sales_price }} €</td>
+                    <td>{{ (current_time - phone.purchase_timestamp ).days }} dana, {{ (
+                        current_time - phone.purchase_timestamp).seconds // 3600 }}h</td>
+
+                    <td>
+                        <form method="POST" action="/sell_phone/{{ phone.id }}" onsubmit="return confirmSell()">
+                            <input type="number" name="price" placeholder="Sell Price" required step="1">
+                            <input type="submit" value="Sell" class="btn btn-success">
+                        </form>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+<script>
+    function filterTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("search");
+        filter = input.value.toLowerCase();
+        table = document.querySelector("table");
+        tr = table.querySelectorAll("tr");
+
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getAttribute("data-search");
+            if (td) {
+                txtValue = td.toLowerCase();
+                if (txtValue.indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+<script>
+    function confirmSell() {
+        return confirm("Are you sure you want to sell this phone?");
+    }
+</script>
+<script>
+// JavaScript function to count the number of phones in the table
+function countPhones() {
+    var table = document.querySelector("table");
+    var tbody = table.querySelector("tbody");
+    var rows = tbody.querySelectorAll("tr");
+    return rows.length;
+}
+
+// Function to update the phone count in HTML
+function updatePhoneCount() {
+    var phoneCount = countPhones();
+    var phoneCountElement = document.getElementById("phoneCount");
+    phoneCountElement.textContent =  phoneCount + " Kom ";
+}
+
+// Call the updatePhoneCount function to display the count
+updatePhoneCount();
+
+</script>
+<script>
+    // JavaScript function to calculate the sum of Preporučena prodajna cena
+    function calculateTotalSalesPrice() {
+        var table = document.querySelector("table");
+        var tbody = table.querySelector("tbody");
+        var rows = tbody.querySelectorAll("tr");
+        var totalSalesPrice = 0;
+
+        for (var i = 0; i < rows.length; i++) {
+            var salesPriceCell = rows[i].querySelector("td:nth-child(9)");
+            if (salesPriceCell) {
+                var salesPriceText = salesPriceCell.textContent;
+                var salesPriceValue = parseFloat(salesPriceText.replace(" €", ""));
+                if (!isNaN(salesPriceValue)) {
+                    totalSalesPrice += salesPriceValue;
+                }
+            }
+        }
+
+        return totalSalesPrice;
+    }
+</script>
+<script>
+    // Function to update the total sales price in HTML
+    function updateTotalSalesPrice() {
+        var totalSalesPrice = calculateTotalSalesPrice();
+        var totalSalesPriceElement = document.getElementById("totalSalesPrice");
+        totalSalesPriceElement.textContent = totalSalesPrice.toFixed(2) + " €"; // Display the total with 2 decimal places
+    }
+
+    // Call the updateTotalSalesPrice function to display the initial total
+    updateTotalSalesPrice();
+</script>
+</html>
+
+
+</html>

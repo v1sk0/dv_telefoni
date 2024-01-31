@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dolce Vita Suppliers</title>
+    <style>
+        /* Add your CSS styles here */
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Dolce Vita Suppliers</h1>
+    </header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/sales_report">Izveštaj prodatih Telefona</a>
+        <a href="/add_listing">Dodaj Telefon</a>
+    </nav>
+    <div class="container">
+        <h2>Suppliers</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Supplier Name</th>
+                    <th>Supplier ID</th>
+                    <th>Supplier Phone</th>
+                    <th>Phones Purchased</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supplier in suppliers %}
+                <tr>
+                    <td>{{ supplier.name }}</td>
+                    <td>{{ supplier.id }}</td>
+                    <td>{{ supplier.phone }}</td>
+                    <td>
+                        <ul>
+                            {% for phone in supplier.phones %}
+                            <li>{{ phone.brand }} {{ phone.model }} (IMEI: {{ phone.imei }})</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

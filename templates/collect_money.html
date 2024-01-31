@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collect Money</title>
+    <!-- Include any necessary CSS or styling here -->
+</head>
+
+<body>
+    <h1>Collect Money</h1>
+
+    <p>Total Sales Price: ${{ total_sales_price }}</p>
+
+    <form method="POST">
+        <div>
+            <label for="amount">Amount to Collect:</label>
+            <input type="number" id="amount" name="amount" required>
+        </div>
+        <div>
+            <label for="timestamp">Timestamp:</label>
+            <input type="datetime-local" id="timestamp" name="timestamp" required>
+        </div>
+        <div>
+            <label for="comment">Comment:</label>
+            <textarea id="comment" name="comment" rows="4"></textarea>
+        </div>
+        <div>
+            <button type="submit">Collect</button>
+        </div>
+    </form>
+
+    <!-- Include any additional content or styling as needed -->
+
+</body>
+
+</html>
