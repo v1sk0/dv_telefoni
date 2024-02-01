@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Service Tickets</title>
+  </head>
+  <body>
+    <h1>Service Tickets</h1>
+    <form action="/add_service_ticket" method="POST">
+      <label for="customer_name">Customer Name:</label>
+      <input
+        type="text"
+        id="customer_name"
+        name="customer_name"
+        required
+      /><br />
+
+      <label for="customer_contact">Customer Contact:</label>
+      <input
+        type="text"
+        id="customer_contact"
+        name="customer_contact"
+        required
+      /><br />
+
+      <label for="customer_email">Customer Email:</label>
+      <input type="email" id="customer_email" name="customer_email" /><br />
+
+      <label for="customer_company_name">Customer Company Name:</label>
+      <input
+        type="text"
+        id="customer_company_name"
+        name="customer_company_name"
+      /><br />
+
+      <label for="customer_pib">Customer PIB:</label>
+      <input type="text" id="customer_pib" name="customer_pib" /><br />
+
+      <label>Service Category:</label><br />
+      <input
+        type="checkbox"
+        id="telefoni"
+        name="service_category"
+        value="Telefoni"
+        required
+      />
+      Telefoni<br />
+      <input
+        type="checkbox"
+        id="racunari"
+        name="service_category"
+        value="Racunari"
+        required
+      />
+      Racunari<br />
+      <input
+        type="checkbox"
+        id="ostalo"
+        name="service_category"
+        value="Ostalo"
+        required
+      />
+      Ostalo<br />
+
+      <label for="brand">Brand:</label>
+      <input type="text" id="brand" name="brand" required /><br />
+
+      <label for="model">Model:</label>
+      <input type="text" id="model" name="model" required /><br />
+
+      <label for="imei">IMEI/Serial:</label>
+      <input type="text" id="imei" name="imei" /><br />
+
+      <label for="comment">Comment:</label>
+      <input type="text" id="comment" name="comment" required /><br />
+
+      <label for="ticket_status">Ticket Status:</label>
+      <select id="ticket_status" name="ticket_status" required>
+        <option value="In work" selected>In work</option></select
+      ><br />
+
+      <label for="sales_price">Sales Price:</label>
+      <input type="text" id="sales_price" name="sales_price" required /><br />
+
+      <label for="priority">Priority:</label>
+      <select id="priority" name="priority">
+        <option value="Normal" selected>Normal</option>
+        <option value="Urgent" selected>Urgent</option></select
+      ><br />
+
+      <label for="assigned_technician">Assigned Technician:</label>
+      <select id="assigned_technician" name="assigned_technician" required>
+        {% for technician in technicians %}
+        <option value="{{ technician.id }}">{{ technician.name }}</option>
+        {% endfor %}</select
+      ><br />
+
+      <label for="attachments">Attachments:</label>
+      <input type="file" id="attachments" name="attachments" /><br />
+
+      <label for="service_location">Service Location:</label>
+      <input
+        type="text"
+        id="service_location"
+        name="service_location"
+        required
+      /><br />
+
+      <input type="submit" value="Add Service Ticket" />
+    </form>
+    <script>
+      var checkboxes = document.querySelectorAll(
+        'input[name="service_category"]'
+      );
+      checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", function () {
+          // Ensure only one checkbox is checked at a time
+          checkboxes.forEach(function (otherCheckbox) {
+            if (otherCheckbox !== checkbox) {
+              otherCheckbox.checked = false;
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

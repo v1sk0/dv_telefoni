@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add Technician</title>
+  </head>
+  <body>
+    <h1>Add Technician</h1>
+    <form action="/add_technician" method="POST">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required /><br />
+
+      <label for="specialization">Specialization:</label>
+      <input type="text" id="specialization" name="specialization" /><br />
+
+      <input type="submit" value="Add Technician" />
+    </form>
+
+    <div id="technician-list">{% include 'technician_list.html' %}</div>
+
+
+
+    <h1>Add Service Location</h1>
+    <form action="/add_service_location" method="POST">
+      <!-- Form fields and input elements here -->
+
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required /><br />
+
+      <label for="address">Address:</label>
+      <input type="text" id="address" name="address" required /><br />
+
+      <label for="contact_phone">Contact Phone:</label>
+      <input
+        type="text"
+        id="contact_phone"
+        name="contact_phone"
+        required
+      /><br />
+
+      <input type="submit" value="Add Service Location" />
+    </form>
+
+    <h1>List Service Locations</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Contact Phone</th>
+          <th>Actions</th>
+          <!-- Add a new header column for actions -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for location in service_locations %}
+        <tr>
+          <td>{{ location.name }}</td>
+          <td>{{ location.address }}</td>
+          <td>{{ location.contact_phone }}</td>
+          <td>
+            <td>
+              <button onclick="confirmRemoval('{{ location.name }}', {{ location.id }}, 'service')">Remove</button>
+            </td>
+            
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+
+  </body>
+</html>

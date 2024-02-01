@@ -1,0 +1,54 @@
+<!-- spare_parts.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Spare Parts</title>
+  </head>
+  <body>
+    <h1>Spare Parts</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Part Category</th>
+          <th>Picture</th>
+          <th>Original Part</th>
+          <th>Comment</th>
+          <th>Quantity in Stock</th>
+          <th>Purchase Price</th>
+          <th>Sell Price</th>
+          <th>Location in Service</th>
+          <th>Purchase Timestamp</th>
+          <th>Collected</th>
+          <th>Inventory Code</th>
+          <th>Barcode</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for spare_part in spare_parts %}
+        <tr>
+          <td>{{ spare_part.id }}</td>
+          <td>{{ spare_part.brand }}</td>
+          <td>{{ spare_part.model }}</td>
+          <td>{{ spare_part.part_category }}</td>
+          <td>{{ spare_part.picture }}</td>
+          <td>{{ "Yes" if spare_part.original_part else "No" }}</td>
+          <td>{{ spare_part.comment }}</td>
+          <td>{{ spare_part.quantity_in_stock }}</td>
+          <td>{{ spare_part.purchase_price }}</td>
+          <td>{{ spare_part.sell_price }}</td>
+          <td>{{ spare_part.warehouse_location }}</td>
+          <td>{{ spare_part.purchase_timestamp }}</td>
+          <td>{{ "Yes" if spare_part.collected else "No" }}</td>
+          <td>{{ spare_part.inventory_code }}</td>
+          <td>{{ spare_part.barcode }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>

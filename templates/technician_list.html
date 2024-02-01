@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Technicians List</title>
+  </head>
+  <body>
+    <h2>Technicians List</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Specialization</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for technician in technicians %}
+        <tr>
+          <td>{{ technician.name }}</td>
+          <td>{{ technician.specialization }}</td>
+          <td>
+            <form action="/remove_technician/{{ technician.id }}" method="POST">
+              <button
+                type="button"
+                onclick="confirmRemoval('{{ technician.name }}', {{ technician.id }})"
+              >
+                Remove
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div id="confirmation-dialog" style="display: none">
+      <p>Are you sure you want to remove <span id="tech-name"></span>?</p>
+      <form action="" method="POST" id="confirmation-form">
+        <input type="hidden" name="_method" value="DELETE" />
+        <button type="submit">Yes, Remove</button>
+        <button type="button" onclick="cancelRemoval()">Cancel</button>
+      </form>
+    </div>
+
+    <script>
+      function confirmRemoval(name, id) {
+        document.getElementById("tech-name").textContent = name;
+        document.getElementById("confirmation-form").action =
+          "/remove_technician/" + id;
+        document.getElementById("confirmation-dialog").style.display = "block";
+      }
+
+      function cancelRemoval() {
+        document.getElementById("confirmation-dialog").style.display = "none";
+      }
+    </script>
+  </body>
+</html>
