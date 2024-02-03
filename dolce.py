@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask import jsonify  # Import jsonify from the flask module
 
 
 
@@ -246,19 +247,25 @@ def add_service_location():
 def list_service_locations():
     # Query all service locations from the database
     service_locations = ServiceLocation.query.all()
+
+    # Create a list of dictionaries to represent service locations
+    location_list = [{"id": location.id, "name": location.name, "address": location.address, "contact_phone": location.contact_phone} for location in service_locations]
+
+    return jsonify({"success": True, "locations": location_list})
     
     # Render the template and pass the data to it
     return render_template('setup_form.html', service_locations=service_locations)
 # Define a route for removing a service location
-@app.route('/remove_service_location', methods=['POST'])
-def remove_service_location():
+@app.route('/remove_service_location/<int:location_id>', methods=['POST'])
+def remove_service_location(location_id):
     if request.method == 'POST':
-        location_id = request.form.get('location_id')
-        if location_id:
-            service_location = ServiceLocation.query.get(location_id)
-            if service_location:
-                db.session.delete(service_location)
-                db.session.commit()
+        service_location = ServiceLocation.query.get(location_id)
+        if service_location:
+            db.session.delete(service_location)
+            db.session.commit()
+            return jsonify({'success': True})  # Return a JSON response upon successful removal
+        else:
+            return jsonify({'success': False, 'error': 'Location not found'})  # Return an error if the location was not found
     return redirect(url_for('list_service_locations'))
 
 

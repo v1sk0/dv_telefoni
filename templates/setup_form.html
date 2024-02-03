@@ -2,74 +2,109 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Add Technician</title>
+    <title>Add Technician and Service Location</title>
   </head>
   <body>
-    <h1>Add Technician</h1>
-    <form action="/add_technician" method="POST">
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required /><br />
+    <!-- Technician Section -->
+    <section>
+      <h1>Add Technician</h1>
+      <form action="/add_technician" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="tech-name" name="name" required /><br />
 
-      <label for="specialization">Specialization:</label>
-      <input type="text" id="specialization" name="specialization" /><br />
+        <label for="specialization">Specialization:</label>
+        <input type="text" id="specialization" name="specialization" /><br />
 
-      <input type="submit" value="Add Technician" />
-    </form>
+        <input type="submit" value="Add Technician" />
+      </form>
 
-    <div id="technician-list">{% include 'technician_list.html' %}</div>
+      <div id="technician-list">{% include 'technician_list.html' %}</div>
+    </section>
 
+    <!-- Location Section -->
+    <section>
+      <h1>Add Service Location</h1>
+      <form action="/add_service_location" method="POST">
+        <label for="loc-name">Name:</label>
+        <input type="text" id="loc-name" name="name" required /><br />
 
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" required /><br />
 
-    <h1>Add Service Location</h1>
-    <form action="/add_service_location" method="POST">
-      <!-- Form fields and input elements here -->
+        <label for="contact_phone">Contact Phone:</label>
+        <input
+          type="text"
+          id="contact_phone"
+          name="contact_phone"
+          required
+        /><br />
 
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required /><br />
+        <input type="submit" value="Add Service Location" />
+      </form>
 
-      <label for="address">Address:</label>
-      <input type="text" id="address" name="address" required /><br />
-
-      <label for="contact_phone">Contact Phone:</label>
-      <input
-        type="text"
-        id="contact_phone"
-        name="contact_phone"
-        required
-      /><br />
-
-      <input type="submit" value="Add Service Location" />
-    </form>
-
-    <h1>List Service Locations</h1>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Address</th>
-          <th>Contact Phone</th>
-          <th>Actions</th>
-          <!-- Add a new header column for actions -->
-        </tr>
-      </thead>
-      <tbody>
-        {% for location in service_locations %}
-        <tr>
-          <td>{{ location.name }}</td>
-          <td>{{ location.address }}</td>
-          <td>{{ location.contact_phone }}</td>
-          <td>
+      <h1>List Service Locations</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Contact Phone</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for location in service_locations %}
+          <tr data-location-id="{{ location.id }}">
+            <td>{{ location.name }}</td>
+            <td>{{ location.address }}</td>
+            <td>{{ location.contact_phone }}</td>
             <td>
-              <button onclick="confirmRemoval('{{ location.name }}', {{ location.id }}, 'service')">Remove</button>
+              <button
+                onclick="confirmLocationRemoval('{{ location.name }}', {{ location.id }})"
+              >
+                Remove
+              </button>
             </td>
-            
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
 
-
-
+    <!-- JavaScript functions for removal -->
+    <script>
+      function confirmLocationRemoval(name, id) {
+        if (
+          confirm(
+            "Are you sure you want to remove this location: " + name + "?"
+          )
+        ) {
+          // Send an AJAX request to remove the location from the database
+          fetch("/remove_service_location/" + id, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // If the removal was successful, remove the location from the HTML
+                var row = document.querySelector(
+                  "tr[data-location-id='" + id + "']"
+                );
+                if (row) {
+                  row.remove();
+                }
+              } else {
+                alert("Failed to remove the location.");
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        }
+      }
+    </script>
   </body>
 </html>
