@@ -270,7 +270,6 @@ def remove_service_location(location_id):
 
 
 
-
 # Rezervni delovi (Spare parts)
 @app.route('/spare_parts')
 def spare_parts():
@@ -285,7 +284,13 @@ def spare_parts():
 def service_tickets():
     technicians = Technician.query.all()  # Retrieve the list of technicians from the database
     service_tickets = ServiceTicket.query.all()
-    return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians)
+    service_locations = ServiceLocation.query.all()  # Retrieve the list of service locations from the database
+    return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians, service_locations=service_locations)
+
+
+
+
+
 
 
 # Tabela Racunara (Computer listings)

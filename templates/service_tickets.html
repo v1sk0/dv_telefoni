@@ -99,12 +99,11 @@
       <input type="file" id="attachments" name="attachments" /><br />
 
       <label for="service_location">Service Location:</label>
-      <input
-        type="text"
-        id="service_location"
-        name="service_location"
-        required
-      /><br />
+      <select id="service_location" name="service_location" required>
+        {% for location in service_locations %}
+        <option value="{{ location.id }}">{{ location.name }}</option>
+        {% endfor %}</select
+      ><br />
 
       <input type="submit" value="Add Service Ticket" />
     </form>
