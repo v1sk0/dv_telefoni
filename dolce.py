@@ -3,8 +3,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask import jsonify  # Import jsonify from the flask module
-
-
+from sqlalchemy import func
+from sqlalchemy import Column, Integer, String
 
 app = Flask(__name__)
 
@@ -83,7 +83,7 @@ class ServiceTicket(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     purchase_timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of Open Ticket
-    service_ticket_nr = db.Column(db.String(20), unique=True, nullable=False)  # Unique service ticket number
+    service_ticket_nr = Column(Integer, unique=True, nullable=False)  # Use Integer type
     date = db.Column(db.Date, default=datetime.utcnow)  # Date the service ticket was created
     customer_name = db.Column(db.String(100), nullable=False)  # Name of the customer
     customer_contact = db.Column(db.String(20))  # Contact details of the customer
@@ -163,6 +163,15 @@ class ServiceLocation(db.Model):
         self.name = name
         self.address = address
         self.contact_phone = contact_phone
+
+# define a function to get the next ticket number
+def get_next_ticket_number():
+    latest_ticket = db.session.query(func.max(ServiceTicket.service_ticket_nr)).scalar()
+    
+    if latest_ticket is not None:
+        return latest_ticket + 1
+    else:
+        return 0  # Start from 0 if no tickets exist yet
 
 
 
@@ -287,7 +296,65 @@ def service_tickets():
     service_locations = ServiceLocation.query.all()  # Retrieve the list of service locations from the database
     return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians, service_locations=service_locations)
 
+@app.route('/add_service_ticket', methods=['POST'])
+def add_service_ticket():
+    if request.method != 'POST':
+        return redirect(url_for('service_tickets'))
 
+    # Retrieve form data using request.form and create a new ServiceTicket object
+    next_ticket_nr = get_next_ticket_number()  # Get the next ticket number
+
+    customer_name = request.form['customer_name']
+    customer_contact = request.form['customer_contact']
+    customer_mail = request.form['customer_email']
+    customer_company_name = request.form['customer_company_name']
+    customer_pib = request.form['customer_pib']
+    
+    # Handle checkbox input for service_category
+    service_section = request.form.get('service_category', '')
+
+    brand = request.form['brand']
+    model = request.form['model']
+    imei = request.form['imei']
+    comment = request.form['comment']
+    ticket_status = request.form['ticket_status']
+    sales_price = request.form['sales_price']
+    priority = request.form['priority']
+    assigned_technician_id = request.form['assigned_technician']
+    attachments = request.form['attachments']
+    service_location_id = request.form['service_location']
+
+    # Get the current timestamp
+    purchase_timestamp = datetime.now()
+
+    # Create a new ServiceTicket object
+    service_ticket = ServiceTicket(
+        service_ticket_nr=next_ticket_nr,  # Set the next ticket number
+        customer_name=customer_name,
+        customer_contact=customer_contact,
+        customer_mail=customer_mail,
+        customer_company_name=customer_company_name,
+        customer_pib=customer_pib,
+        service_section=service_section,
+        brand=brand,
+        model=model,
+        imei=imei,
+        comment=comment,
+        ticket_status=ticket_status,
+        sales_price=sales_price,
+        priority=priority,
+        assigned_technician=assigned_technician_id,
+        attachments=attachments,
+        service_location=service_location_id,
+        purchase_timestamp=purchase_timestamp,
+    )
+
+    # Add the service_ticket to the database and commit the transaction
+    db.session.add(service_ticket)
+    db.session.commit()
+
+    flash('Service ticket added successfully', 'success')
+    return redirect(url_for('service_tickets'))
 
 
 

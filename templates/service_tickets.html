@@ -76,7 +76,9 @@
 
       <label for="ticket_status">Ticket Status:</label>
       <select id="ticket_status" name="ticket_status" required>
-        <option value="In work" selected>In work</option></select
+        <option value="In_work" selected>U radu</option>
+        <option value="Finished" selected>Završen</option>
+        <option value="Rejected" selected>Odbačen</option></select
       ><br />
 
       <label for="sales_price">Sales Price:</label>
@@ -113,12 +115,33 @@
       );
       checkboxes.forEach(function (checkbox) {
         checkbox.addEventListener("change", function () {
+          // Track if any checkbox is checked
+          var atLeastOneChecked = false;
+
+          // Check if any checkbox is checked and track the count
+          checkboxes.forEach(function (otherCheckbox) {
+            if (otherCheckbox.checked) {
+              atLeastOneChecked = true;
+            }
+          });
+
           // Ensure only one checkbox is checked at a time
           checkboxes.forEach(function (otherCheckbox) {
             if (otherCheckbox !== checkbox) {
               otherCheckbox.checked = false;
             }
           });
+
+          // Pass validation if at least one checkbox is checked
+          if (atLeastOneChecked) {
+            checkboxes.forEach(function (otherCheckbox) {
+              otherCheckbox.required = false;
+            });
+          } else {
+            checkboxes.forEach(function (otherCheckbox) {
+              otherCheckbox.required = true;
+            });
+          }
         });
       });
     </script>
