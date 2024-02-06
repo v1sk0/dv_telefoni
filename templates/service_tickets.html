@@ -74,12 +74,12 @@
       <label for="comment">Comment:</label>
       <input type="text" id="comment" name="comment" required /><br />
 
-      <label for="ticket_status">Ticket Status:</label>
-      <select id="ticket_status" name="ticket_status" required>
-        <option value="In_work" selected>U radu</option>
-        <option value="Finished" selected>Završen</option>
-        <option value="Rejected" selected>Odbačen</option></select
-      ><br />
+      <input
+        type="hidden"
+        id="ticket_status"
+        name="ticket_status"
+        value="Open"
+      />
 
       <label for="sales_price">Sales Price:</label>
       <input type="text" id="sales_price" name="sales_price" required /><br />
@@ -87,8 +87,10 @@
       <label for="priority">Priority:</label>
       <select id="priority" name="priority">
         <option value="Normal" selected>Normal</option>
-        <option value="Urgent" selected>Urgent</option></select
-      ><br />
+        <option value="Urgent">Urgent</option>
+      </select>
+
+      <br />
 
       <label for="assigned_technician">Assigned Technician:</label>
       <select id="assigned_technician" name="assigned_technician" required>
@@ -109,6 +111,93 @@
 
       <input type="submit" value="Add Service Ticket" />
     </form>
+
+    <h1>Active Service Tickets</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Ticket Number</th>
+          <th>Date</th>
+          <th>Customer Name</th>
+          <th>Service Section</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Opis kvara</th>
+          <th>Status</th>
+          <th>Okvirna cena</th>
+          <th>Actions</th>
+          <!-- Add more columns as needed -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in service_tickets if ticket.ticket_status == 'Open' %}
+        <tr>
+          <td>{{ ticket.service_ticket_nr }}</td>
+          <td>{{ ticket.date }}</td>
+          <td>{{ ticket.customer_name }}</td>
+          <td>{{ ticket.service_section }}</td>
+          <td>{{ ticket.brand }}</td>
+          <td>{{ ticket.model }}</td>
+          <td>{{ ticket.comment }}</td>
+          <td>{{ ticket.ticket_status }}</td>
+          <td>{{ ticket.sales_price }}</td>
+          <td>
+            {% if ticket.ticket_status == 'Closed' %} Completed {% else %}
+            <button class="complete-button" data-ticket-id="{{ ticket.id }}">
+              Complete
+            </button>
+            {% endif %}
+          </td>
+
+          <!-- Add more columns as needed -->
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h1>Closed Service Tickets unpaid</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Ticket Number</th>
+          <th>Date</th>
+          <th>Customer Name</th>
+          <th>Service Section</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Opis kvara</th>
+          <th>Status</th>
+          <th>Okvirna cena</th>
+          <th>Final Price</th>
+          <th>Actions</th>
+          <!-- Add more columns as needed -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in service_tickets if ticket.ticket_status == 'Closed' and
+        ticket.collected==0 %}
+        <tr>
+          <td>{{ ticket.service_ticket_nr }}</td>
+          <td>{{ ticket.date }}</td>
+          <td>{{ ticket.customer_name }}</td>
+          <td>{{ ticket.service_section }}</td>
+          <td>{{ ticket.brand }}</td>
+          <td>{{ ticket.model }}</td>
+          <td>{{ ticket.comment }}</td>
+          <td>{{ ticket.ticket_status }}</td>
+          <td>{{ ticket.sales_price }}</td>
+          <td>
+            <input type="number" id="final-price-{{ ticket.id }}" />
+            <button class="collect-button" data-ticket-id="{{ ticket.id }}">
+              Collect
+            </button>
+          </td>
+          <!-- Add more columns as needed -->
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     <script>
       var checkboxes = document.querySelectorAll(
         'input[name="service_category"]'
@@ -141,6 +230,90 @@
             checkboxes.forEach(function (otherCheckbox) {
               otherCheckbox.required = true;
             });
+          }
+        });
+      });
+    </script>
+
+    <script>
+      // JavaScript to handle "Complete" button click
+      const completeButtons = document.querySelectorAll(".complete-button");
+      completeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          if (
+            confirm("Are you sure you want to mark this ticket as Complete?")
+          ) {
+            // Get the ticket ID from data attribute
+            const ticketId = button.getAttribute("data-ticket-id");
+
+            // Send a request to update the ticket status and add a closed timestamp to the database
+            fetch(`/update_ticket_status/${ticketId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ newStatus: "Closed" }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  // If the update was successful, you can optionally update the UI here
+                  // For example, you can change the button text or disable it
+                  button.textContent = "Completed";
+                  button.disabled = true;
+
+                  // Reload the page after the button click
+                  location.reload();
+                } else {
+                  alert("Failed to update ticket status.");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          }
+        });
+      });
+    </script>
+
+    <script>
+      // JavaScript to handle "Collect" button click
+      const collectButtons = document.querySelectorAll(".collect-button");
+      collectButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const ticketId = button.getAttribute("data-ticket-id");
+          const finalPriceInput = document.getElementById(
+            `final-price-${ticketId}`
+          );
+          const finalPrice = parseFloat(finalPriceInput.value);
+
+          if (
+            confirm(
+              `Are you sure you want to collect this ticket with a final price of $${finalPrice.toFixed(
+                2
+              )}?`
+            )
+          ) {
+            // Send a request to update the ticket status and final price in the database
+            fetch(`/collect_ticket/${ticketId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ finalPrice }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  alert("Ticket collected successfully.");
+                  // Optionally update the UI here
+                } else {
+                  alert("Failed to collect ticket.");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
           }
         });
       });

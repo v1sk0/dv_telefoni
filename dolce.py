@@ -108,7 +108,16 @@ class ServiceTicket(db.Model):
     notification_preference = db.Column(db.String(20))  # Preferred method of notification, e.g., 'Email', 'SMS'
     ticket_notes = db.Column(db.Text)  # Notes or additional information about the service ticket
     collected = db.Column(db.Boolean, default=False)  # Whether the payment has been collected after selling
-
+    closed_timestamp = db.Column(db.DateTime(timezone=True))  # Timestamp when the ticket was closed
+    collected_timestamp = db.Column(db.DateTime(timezone=True))  # Timestamp when the ticket was collected
+    owner_collect = db.Column(db.String(255))  # Owner who collected the ticket
+    owner_collect_timestamp = db.Column(db.DateTime(timezone=True))  # Timestamp when the ticket was collected by the owner
+    sms_notification_completed = db.Column(db.Boolean, default=False)  # SMS notification for completion
+    sms_notification_10_days = db.Column(db.Boolean, default=False)  # SMS notification for 10 days
+    sms_notification_30_days = db.Column(db.Boolean, default=False)  # SMS notification for 30 days
+    
+    
+    
 class ComputerListing(db.Model):
     """
     Represents a computer listing in the database.
@@ -149,6 +158,7 @@ class Technician(db.Model):
     def __init__(self, name, specialization):
         self.name = name
         self.specialization = specialization
+        
         # Initialize other fields as needed
 
 
@@ -192,6 +202,29 @@ def get_next_ticket_number():
         next_ticket_number = int(highest_ticket.service_ticket_nr) + 1
 
     return next_ticket_number
+
+# get closed collected tickets
+def get_closed_collected_tickets():
+    try:
+        # Query the database to get closed service tickets with collected status = 1
+        closed_collected_tickets = ServiceTicket.query.filter_by(ticket_status='Closed', collected=1).all()
+        return closed_collected_tickets
+    except Exception as e:
+        # Handle any exceptions or errors that may occur during the database query
+        print(f"Error while fetching closed collected tickets: {str(e)}")
+        return []
+
+# Additional database operations or functions can be defined here
+
+
+
+
+
+
+
+
+
+
 
 # Routes and views for the application
 
@@ -347,6 +380,7 @@ def add_service_ticket():
         attachments=attachments,
         service_location=service_location_id,
         purchase_timestamp=purchase_timestamp,
+       
     )
 
     # Add the service_ticket to the database and commit the transaction
@@ -607,6 +641,56 @@ def add_listing():
         return redirect(url_for('index'))
 
     return render_template('add_listing.html')  # Create this template for the add listing form
+
+
+# service tickets
+
+# Update the status of a service ticket
+@app.route('/update_ticket_status/<int:ticket_id>', methods=['PUT'])
+def update_ticket_status(ticket_id):
+    new_status = request.json.get('newStatus')
+    ticket = ServiceTicket.query.get(ticket_id)
+
+    if not ticket:
+        return jsonify({'success': False, 'message': 'Ticket not found'}), 404
+
+    ticket.ticket_status = new_status
+
+    if new_status == 'Closed':
+        ticket.closed_timestamp = datetime.now()  # Set the closed timestamp
+
+    db.session.commit()
+
+    return jsonify({'success': True}), 200
+
+@app.route('/collect_ticket/<int:ticket_id>', methods=['PUT'])
+def collect_ticket(ticket_id):
+    # Get the final price from the request
+    data = request.get_json()
+    final_price = data.get('finalPrice')
+
+    # Update the ticket status and final price in the database
+    ticket = ServiceTicket.query.get(ticket_id)
+    if ticket:
+        ticket.sales_price = final_price
+        ticket.collected = 1  # Assuming 'collected' is a boolean field
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False}), 404
+
+# Define a route to display the closed_service_tickets.html template
+@app.route('/closed_service_tickets')
+def closed_service_tickets():
+    # Query the database to get closed service tickets with collected status = 1
+    closed_tickets = get_closed_collected_tickets()  # Implement this function based on your database model
+
+    return render_template('closed_service_tickets.html', closed_tickets=closed_tickets)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

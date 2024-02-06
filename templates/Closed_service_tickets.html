@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Closed Service Tickets</title>
+  </head>
+  <body>
+    <h1>Closed Service Tickets (Collected)</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Ticket Number</th>
+          <th>Date</th>
+          <th>Customer Name</th>
+          <th>Service Section</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Opis kvara</th>
+          <th>Status</th>
+          <th>Final Price</th>
+          <!-- Add more columns as needed -->
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in closed_tickets %}
+        <tr>
+          <td>{{ ticket.service_ticket_nr }}</td>
+          <td>{{ ticket.date }}</td>
+          <td>{{ ticket.customer_name }}</td>
+          <td>{{ ticket.service_section }}</td>
+          <td>{{ ticket.brand }}</td>
+          <td>{{ ticket.model }}</td>
+          <td>{{ ticket.comment }}</td>
+          <td>{{ ticket.ticket_status }}</td>
+          <td>{{ ticket.sales_price }}</td>
+          <!-- Add more columns as needed -->
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
