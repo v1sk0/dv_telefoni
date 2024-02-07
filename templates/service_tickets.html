@@ -126,6 +126,7 @@
           <th>Opis kvara</th>
           <th>Status</th>
           <th>Okvirna cena</th>
+          <th>Open Duration</th>
           <th>Actions</th>
           <!-- Add more columns as needed -->
         </tr>
@@ -142,6 +143,7 @@
           <td>{{ ticket.comment }}</td>
           <td>{{ ticket.ticket_status }}</td>
           <td>{{ ticket.sales_price }}</td>
+          <td>{{ ticket.open_duration }}</td>
           <td>
             {% if ticket.ticket_status == 'Closed' %} Completed {% else %}
             <button class="complete-button" data-ticket-id="{{ ticket.id }}">
@@ -168,6 +170,7 @@
           <th>Model</th>
           <th>Opis kvara</th>
           <th>Status</th>
+          <th>Complete Duration</th>
           <th>Okvirna cena</th>
           <th>Final Price</th>
           <th>Actions</th>
@@ -186,7 +189,9 @@
           <td>{{ ticket.model }}</td>
           <td>{{ ticket.comment }}</td>
           <td>{{ ticket.ticket_status }}</td>
+          <td class="duration">{{ ticket.complete_duration }}</td>
           <td>{{ ticket.sales_price }}</td>
+
           <td>
             <input type="number" id="final-price-{{ ticket.id }}" />
             <button class="collect-button" data-ticket-id="{{ ticket.id }}">
@@ -318,5 +323,35 @@
         });
       });
     </script>
-  </body>
+    <script>
+      // Get all table cells with the class "duration"
+      var durationCells = document.querySelectorAll('.duration');
+
+      // Iterate over each table cell and format the duration
+      durationCells.forEach(function(cell) {
+          var durationInSeconds = parseInt(cell.innerText);
+
+          // Calculate days, hours, minutes
+          var days = Math.floor(durationInSeconds / (3600 * 24));
+          var hours = Math.floor((durationInSeconds % (3600 * 24)) / 3600);
+          var minutes = Math.floor((durationInSeconds % 3600) / 60);
+
+          // Define the formatted duration string
+          var formattedDuration = "";
+
+          // Include days if greater than 0
+          if (days > 0) {
+              formattedDuration += days + " days, ";
+          }
+
+          // Include hours
+          formattedDuration += hours + " hours, ";
+
+          // Include minutes
+          formattedDuration += minutes + " minutes";
+
+          // Display the formatted duration in the table cell
+          cell.innerText = formattedDuration;
+      });
+  </script>
 </html>

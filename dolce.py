@@ -115,7 +115,7 @@ class ServiceTicket(db.Model):
     sms_notification_completed = db.Column(db.Boolean, default=False)  # SMS notification for completion
     sms_notification_10_days = db.Column(db.Boolean, default=False)  # SMS notification for 10 days
     sms_notification_30_days = db.Column(db.Boolean, default=False)  # SMS notification for 30 days
-    
+    complete_duration = db.Column(db.Integer) # Duration of the service ticket completion
     
     
 class ComputerListing(db.Model):
@@ -324,10 +324,24 @@ def spare_parts():
 # Tabela servisnih naloga (Service tickets)
 @app.route('/service_tickets')
 def service_tickets():
-    technicians = Technician.query.all()  # Retrieve the list of technicians from the database
+    technicians = Technician.query.all()
     service_tickets = ServiceTicket.query.all()
-    service_locations = ServiceLocation.query.all()  # Retrieve the list of service locations from the database
+    service_locations = ServiceLocation.query.all()
+
+    # Calculate and update the "Open Duration" for each active service ticket
+    for ticket in service_tickets:
+        if ticket.ticket_status == 'Open':
+            current_time = datetime.now()
+            time_difference = current_time - ticket.purchase_timestamp
+            days = time_difference.days
+            seconds = time_difference.seconds
+            hours, remainder = divmod(seconds, 3600)
+            minutes, _ = divmod(remainder, 60)
+            ticket.open_duration = f"{days} days, {hours} hours, {minutes} minutes"
+
     return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians, service_locations=service_locations)
+
+
 
 @app.route('/add_service_ticket', methods=['POST'])
 def add_service_ticket():
@@ -645,7 +659,7 @@ def add_listing():
 
 # service tickets
 
-# Update the status of a service ticket
+ # Update the status of a service ticket
 @app.route('/update_ticket_status/<int:ticket_id>', methods=['PUT'])
 def update_ticket_status(ticket_id):
     new_status = request.json.get('newStatus')
@@ -654,10 +668,18 @@ def update_ticket_status(ticket_id):
     if not ticket:
         return jsonify({'success': False, 'message': 'Ticket not found'}), 404
 
-    ticket.ticket_status = new_status
+    if ticket.ticket_status != new_status:
+        ticket.ticket_status = new_status
 
-    if new_status == 'Closed':
-        ticket.closed_timestamp = datetime.now()  # Set the closed timestamp
+        if new_status == 'Closed':
+            # Set the closed timestamp
+            ticket.closed_timestamp = datetime.now()
+
+            # Calculate the complete duration in seconds
+            complete_duration = (ticket.closed_timestamp - ticket.purchase_timestamp).total_seconds()
+
+            # Store the complete duration in seconds
+            ticket.complete_duration = complete_duration
 
     db.session.commit()
 
