@@ -328,7 +328,11 @@ def service_tickets():
     service_tickets = ServiceTicket.query.all()
     service_locations = ServiceLocation.query.all()
 
-    open_tickets_count = 0  # Initialize the counter
+    open_tickets_count = 0  # Initialize the counter for open tickets
+    closed_not_collected_tickets_count = 0  # Initialize the counter for closed, not collected tickets
+    open_tickets_sales_sum = 0  # Initialize the sum of sales_price for open tickets
+    closed_tickets_sales_sum = 0  # Initialize the sum of sales_price for closed tickets
+    closed_collected_tickets_sales_sum = 0  # Initialize the sum of sales_price for closed, collected tickets
 
     # Calculate and update the "Open Duration" for each active service ticket
     for ticket in service_tickets:
@@ -340,9 +344,16 @@ def service_tickets():
             hours, remainder = divmod(seconds, 3600)
             minutes, _ = divmod(remainder, 60)
             ticket.open_duration = f"{days} days, {hours} hours, {minutes} minutes"
-            open_tickets_count += 1  # Increment the counter
+            open_tickets_count += 1  # Increment the counter for open tickets
+            open_tickets_sales_sum += ticket.sales_price  # Add the sales_price to the sum
+        elif ticket.ticket_status == 'Closed':
+            if ticket.collected == 0:
+                closed_not_collected_tickets_count += 1  # Increment the counter for closed, not collected tickets
+                closed_tickets_sales_sum += ticket.sales_price  # Add the sales_price to the sum for closed tickets
+            else:
+                closed_collected_tickets_sales_sum += ticket.sales_price  # Add the sales_price to the sum for closed, collected tickets
 
-    return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians, service_locations=service_locations, open_tickets_count=open_tickets_count)
+    return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians, service_locations=service_locations, open_tickets_count=open_tickets_count, closed_not_collected_tickets_count=closed_not_collected_tickets_count, open_tickets_sales_sum=open_tickets_sales_sum, closed_tickets_sales_sum=closed_tickets_sales_sum, closed_collected_tickets_sales_sum=closed_collected_tickets_sales_sum)
 
 
 
@@ -352,7 +363,7 @@ def add_service_ticket():
         return redirect(url_for('service_tickets'))
 
     # Retrieve form data using request.form and create a new ServiceTicket object
-    next_ticket_nr = get_next_ticket_number()  # Get the next ticket number
+    next_ticket_nr = get_next_ticket_number()  # Get the next ticket numFber
 
     customer_name = request.form['customer_name']
     customer_contact = request.form['customer_contact']
@@ -720,7 +731,14 @@ def closed_service_tickets():
     # Query the database to get closed service tickets with collected status = 1
     closed_tickets = get_closed_collected_tickets()  # Implement this function based on your database model
 
-    return render_template('closed_service_tickets.html', closed_tickets=closed_tickets)
+    closed_collected_tickets = ServiceTicket.query.filter(
+        ServiceTicket.ticket_status=='Closed', 
+        ServiceTicket.collected==1, 
+        ServiceTicket.owner_collect.is_(None)
+    ).all()
+    closed_collected_tickets_sales_sum = sum(ticket.sales_price for ticket in closed_collected_tickets)
+
+    return render_template('closed_service_tickets.html', closed_tickets=closed_tickets, closed_collected_tickets_sales_sum=closed_collected_tickets_sales_sum)
 
 @app.route('/owner_collect_ticket/<int:ticket_id>', methods=['PUT'])
 def owner_collect_ticket(ticket_id):

@@ -112,7 +112,7 @@
       <input type="submit" value="Add Service Ticket" />
     </form>
 
-    <h1>Active Service Tickets {{ open_tickets_count }}</h1>
+    <h1>Active Service Tickets {{ open_tickets_count }}  Ukupna suma {{ open_tickets_sales_sum }}</h1>
 
     <table>
       <thead>
@@ -158,7 +158,7 @@
       </tbody>
     </table>
 
-    <h1>Closed Service Tickets unpaid</h1>
+    <h1>Closed Service Tickets unpaid {{ closed_not_collected_tickets_count }} Ukupna suma {{ closed_tickets_sales_sum }}</h1>
     <table>
       <thead>
         <tr>
