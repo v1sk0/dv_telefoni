@@ -112,7 +112,7 @@
       <input type="submit" value="Add Service Ticket" />
     </form>
 
-    <h1>Active Service Tickets</h1>
+    <h1>Active Service Tickets {{ open_tickets_count }}</h1>
 
     <table>
       <thead>
@@ -181,6 +181,7 @@
         {% for ticket in service_tickets if ticket.ticket_status == 'Closed' and
         ticket.collected==0 %}
         <tr>
+          
           <td>{{ ticket.service_ticket_nr }}</td>
           <td>{{ ticket.date }}</td>
           <td>{{ ticket.customer_name }}</td>
@@ -285,44 +286,43 @@
       // JavaScript to handle "Collect" button click
       const collectButtons = document.querySelectorAll(".collect-button");
       collectButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          const ticketId = button.getAttribute("data-ticket-id");
-          const finalPriceInput = document.getElementById(
-            `final-price-${ticketId}`
-          );
-          const finalPrice = parseFloat(finalPriceInput.value);
-
-          if (
-            confirm(
-              `Are you sure you want to collect this ticket with a final price of $${finalPrice.toFixed(
-                2
-              )}?`
-            )
-          ) {
-            // Send a request to update the ticket status and final price in the database
-            fetch(`/collect_ticket/${ticketId}`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ finalPrice }),
-            })
-              .then((response) => response.json())
-              .then((data) => {
-                if (data.success) {
-                  alert("Ticket collected successfully.");
-                  // Optionally update the UI here
-                } else {
-                  alert("Failed to collect ticket.");
-                }
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-              });
-          }
-        });
+          button.addEventListener("click", () => {
+              const ticketId = button.getAttribute("data-ticket-id");
+              const finalPriceInput = document.getElementById(`final-price-${ticketId}`);
+              let finalPrice = parseFloat(finalPriceInput.value);
+              
+              // Check if final price input is blank
+              if (isNaN(finalPrice) || finalPrice === 0) {
+                  // Use predefined price if final price input is blank
+                  finalPrice = parseFloat(finalPriceInput.getAttribute("data-predefined-price"));
+              }
+  
+              if (confirm(`Are you sure you want to collect this ticket with a final price of $${finalPrice.toFixed(2)}?`)) {
+                  fetch(`/collect_ticket/${ticketId}`, {
+                      method: "PUT",
+                      headers: {
+                          "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ finalPrice }),
+                  })
+                  .then((response) => response.json())
+                  .then((data) => {
+                      if (data.success) {
+                          alert("Ticket collected successfully.");
+                          // Reload the page to refresh the tables
+                          window.location.reload();
+                      } else {
+                          alert("Failed to collect ticket.");
+                      }
+                  })
+                  .catch((error) => {
+                      console.error("Error:", error);
+                  });
+              }
+          });
       });
-    </script>
+  </script>
+  
     <script>
       // Get all table cells with the class "duration"
       var durationCells = document.querySelectorAll('.duration');

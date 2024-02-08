@@ -328,6 +328,8 @@ def service_tickets():
     service_tickets = ServiceTicket.query.all()
     service_locations = ServiceLocation.query.all()
 
+    open_tickets_count = 0  # Initialize the counter
+
     # Calculate and update the "Open Duration" for each active service ticket
     for ticket in service_tickets:
         if ticket.ticket_status == 'Open':
@@ -338,8 +340,9 @@ def service_tickets():
             hours, remainder = divmod(seconds, 3600)
             minutes, _ = divmod(remainder, 60)
             ticket.open_duration = f"{days} days, {hours} hours, {minutes} minutes"
+            open_tickets_count += 1  # Increment the counter
 
-    return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians, service_locations=service_locations)
+    return render_template('service_tickets.html', service_tickets=service_tickets, technicians=technicians, service_locations=service_locations, open_tickets_count=open_tickets_count)
 
 
 
@@ -687,22 +690,29 @@ def update_ticket_status(ticket_id):
 
 @app.route('/collect_ticket/<int:ticket_id>', methods=['PUT'])
 def collect_ticket(ticket_id):
-    # Get the final price from the request
-    data = request.get_json()
-    final_price = data.get('finalPrice')
+    try:
+        # Get the final price from the request payload
+        data = request.json
+        final_price = data.get('finalPrice')
 
-    # Update the ticket status and final price in the database
-    ticket = ServiceTicket.query.get(ticket_id)
-    if ticket:
-        ticket.sales_price = final_price
-        ticket.collected = 1  # Assuming 'collected' is a boolean field
+        # Update the ticket status, final price, and collected timestamp in the database
+        ticket = ServiceTicket.query.get(ticket_id)
+        if ticket:
+            # Preserve the existing final price if not provided in the request payload
+            if final_price is not None:
+                ticket.sales_price = final_price
+            
+            ticket.collected = True  # Assuming 'collected' is a boolean field
+            ticket.collected_timestamp = datetime.now()
 
-        # Commit the changes to the database
-        db.session.commit()
+            # Commit the changes to the database
+            db.session.commit()
 
-        return jsonify({'success': True})
-    else:
-        return jsonify({'success': False}), 404
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({'success': False}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # Define a route to display the closed_service_tickets.html template
 @app.route('/closed_service_tickets')
@@ -712,7 +722,27 @@ def closed_service_tickets():
 
     return render_template('closed_service_tickets.html', closed_tickets=closed_tickets)
 
+@app.route('/owner_collect_ticket/<int:ticket_id>', methods=['PUT'])
+def owner_collect_ticket(ticket_id):
+    # Get the sales price from the request payload
+    data = request.get_json()
+    sales_price = data.get('salesPrice')
 
+    # Update the database with owner collect information
+    ticket = ServiceTicket.query.get(ticket_id)
+    if ticket:
+        ticket.owner_collect = 1
+        ticket.owner_collect_timestamp = datetime.utcnow()  # Assuming you're using UTC time
+
+        # Optionally, update the sales price as well
+        ticket.sales_price = sales_price
+
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({'success': True})
+    else:
+        return jsonify({'success': False, 'error': 'Ticket not found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

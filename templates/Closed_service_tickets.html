@@ -19,6 +19,7 @@
           <th>Opis kvara</th>
           <th>Status</th>
           <th>Final Price</th>
+          <th>Actions</th>
           <!-- Add more columns as needed -->
         </tr>
       </thead>
@@ -34,10 +35,57 @@
           <td>{{ ticket.comment }}</td>
           <td>{{ ticket.ticket_status }}</td>
           <td>{{ ticket.sales_price }}</td>
+          <td>
+            {% if ticket.owner_collect is none %}
+            <button
+              class="owner-collect-button"
+              data-ticket-id="{{ ticket.id }}"
+              data-sales-price="{{ ticket.sales_price }}"
+            >
+              Owner Collect
+            </button>
+            {% endif %}
+          </td>
           <!-- Add more columns as needed -->
         </tr>
         {% endfor %}
       </tbody>
     </table>
+
+    <script>
+      // JavaScript to handle "Owner Collect" button click
+      const ownerCollectButtons = document.querySelectorAll(
+        ".owner-collect-button"
+      );
+      ownerCollectButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const ticketId = button.getAttribute("data-ticket-id");
+          const salesPrice = button.getAttribute("data-sales-price");
+
+          if (confirm(`Are you sure you want to collect $${salesPrice}?`)) {
+            fetch(`/owner_collect_ticket/${ticketId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ salesPrice }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  alert("Ticket collected successfully.");
+                  // Reload the page to refresh the tables
+                  window.location.reload();
+                } else {
+                  alert("Failed to collect ticket.");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          }
+        });
+      });
+    </script>
   </body>
 </html>
