@@ -23,6 +23,8 @@
           <th>Status</th>
           <th>Final Price</th>
           <th>Actions</th>
+          <th>Owner Collected Time</th>
+
           <!-- Add more columns as needed -->
         </tr>
       </thead>
@@ -49,6 +51,12 @@
             </button>
             {% endif %}
           </td>
+          <td>
+            {% if ticket.owner_collect_timestamp %} {{
+            ticket.owner_collect_timestamp.strftime('%Hh:%Mm - %d.%m.%Y') }} {%
+            endif %}
+          </td>
+
           <!-- Add more columns as needed -->
         </tr>
         {% endfor %}

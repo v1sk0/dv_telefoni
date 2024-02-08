@@ -42,7 +42,7 @@ class PhoneListing(db.Model):
     supplier_name = db.Column(db.String(100))  # Name of the supplier
     supplier_id_card = db.Column(db.String(50))  # ID card number of the supplier
     supplier_mobile = db.Column(db.String(15))  # Contact number of the supplier
-    purchase_timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of purchase from the supplier
+    purchase_timestamp = db.Column(db.DateTime, default=datetime.now)   # Timestamp of purchase from the supplier
     sold = db.Column(db.Boolean, default=False)  # Flag to indicate if the phone has been sold
     sale_timestamp = db.Column(db.DateTime(timezone=True))  # Timestamp of sale to customer (with timezone)
     turnover_time = db.Column(db.Interval)  # Time interval to sell the phone after purchase
@@ -54,7 +54,7 @@ class SparePart(db.Model):
     Represents a spare part listing in the database.
     """
     id = db.Column(db.Integer, primary_key=True)
-    purchase_timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of purchase from the supplier
+    purchase_timestamp = db.Column(db.DateTime, default=datetime.now)   # Timestamp of purchase from the supplier
     service_section = db.Column(db.String(50), nullable=False)  # Section of service, e.g., 'Mobile', 'PC'
     brand = db.Column(db.String(100))  # Brand of the spare part
     model = db.Column(db.String(100))  # Model number or identifier of the spare part
@@ -68,7 +68,7 @@ class SparePart(db.Model):
     purchase_price = db.Column(db.Float)  # Purchase price of the spare part
     sales_price = db.Column(db.Float)  # Recommended selling price of the spare part
     warehouse_location = db.Column(db.String(100))  # Storage location within the warehouse
-    purchase_timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of the spare part purchase
+    purchase_timestamp = db.Column(db.DateTime, default=datetime.now)  # Timestamp of the spare part purchase
     collected = db.Column(db.Boolean, default=False)  # Whether the payment has been collected after selling
     inventory_code = db.Column(db.String(50), unique=True)  # Unique code for inventory management
     barcode = db.Column(db.String(50), unique=True)  # Barcode of the spare part
@@ -82,9 +82,9 @@ class ServiceTicket(db.Model):
     Represents a service ticket in the database.
     """
     id = db.Column(db.Integer, primary_key=True)
-    purchase_timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of Open Ticket
+    purchase_timestamp = db.Column(db.DateTime, default=datetime.now)   # Timestamp of Open Ticket
     service_ticket_nr = Column(Integer, unique=True, nullable=False)  # Use Integer type
-    date = db.Column(db.Date, default=datetime.utcnow)  # Date the service ticket was created
+    date = db.Column(db.Date, default=datetime.now)   # Date the service ticket was created
     customer_name = db.Column(db.String(100), nullable=False)  # Name of the customer
     customer_contact = db.Column(db.String(20))  # Contact details of the customer
     customer_mail = db.Column(db.String(100))  # Email address of the customer
@@ -123,7 +123,7 @@ class ComputerListing(db.Model):
     Represents a computer listing in the database.
     """
     id = db.Column(db.Integer, primary_key=True)
-    purchase_timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of purchase from the supplier
+    purchase_timestamp = db.Column(db.DateTime, default=datetime.now)   # Timestamp of purchase from the supplier
     type = db.Column(db.String(20))  # Type of computer, values like 'Laptop' or 'PC'
     brand = db.Column(db.String(100))  # Brand of the computer, e.g., 'Dell', 'HP'
     model = db.Column(db.String(100))  # Specific model of the computer, e.g., 'XPS 15', 'Pavilion 15'
@@ -142,7 +142,7 @@ class ComputerListing(db.Model):
     supplier_name = db.Column(db.String(100))  # Name of the supplier
     supplier_id_card = db.Column(db.String(50))  # ID card number of the supplier
     supplier_mobile = db.Column(db.String(15))  # Contact number of the supplier
-    purchase_timestamp = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of purchase from supplier
+    purchase_timestamp = db.Column(db.DateTime, default=datetime.now)   # Timestamp of purchase from supplier
     sold = db.Column(db.Boolean, default=False)  # Flag to indicate if the computer has been sold
     sale_timestamp = db.Column(db.DateTime)  # Timestamp of sale to customer
     turnover_time = db.Column(db.Interval)  # Time interval to sell the computer after purchase
@@ -750,7 +750,7 @@ def owner_collect_ticket(ticket_id):
     ticket = ServiceTicket.query.get(ticket_id)
     if ticket:
         ticket.owner_collect = 1
-        ticket.owner_collect_timestamp = datetime.utcnow()  # Assuming you're using UTC time
+        ticket.owner_collect_timestamp = datetime.now()  # Fetch local time from PC
 
         # Optionally, update the sales price as well
         ticket.sales_price = sales_price
