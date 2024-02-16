@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Printable Ticket</title>
+    <style>
+      /* Define your CSS styles for the printable ticket here */
+      body {
+        font-family: Arial, sans-serif;
+      }
+      .ticket-container {
+        width: 80%;
+        margin: 0 auto;
+      }
+      .ticket-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .ticket-details {
+        border: 1px solid #ccc;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .ticket-details h2 {
+        margin-top: 0;
+      }
+      .ticket-details p {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ticket-container">
+      <div class="ticket-header">
+        <h1>Service Ticket</h1>
+      </div>
+      <div class="ticket-details">
+        <h2>Ticket Number: {{ ticket.service_ticket_nr }}</h2>
+        <p>Date: {{ ticket.date }}</p>
+        <p>Customer Name: {{ ticket.customer_name }}</p>
+        <!-- Add more ticket details as needed -->
+        <p>Service Section: {{ ticket.service_section }}</p>
+        <p>Brand: {{ ticket.brand }}</p>
+        <p>Model: {{ ticket.model }}</p>
+        <p>Description: {{ ticket.comment }}</p>
+        <p>Status: {{ ticket.ticket_status }}</p>
+        <p>Sales Price: {{ ticket.sales_price }}</p>
+        <p>Priority: {{ ticket.priority }}</p>
+        <p>Assigned Technician: {{ ticket.assigned_technician }}</p>
+        <!-- Add more ticket details as needed -->
+      </div>
+    </div>
+  </body>
+</html>

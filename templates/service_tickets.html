@@ -92,12 +92,14 @@
 
       <br />
 
-      <label for="assigned_technician">Assigned Technician:</label>
+      <label for="assigned_technician">Assigned Technician name:</label>
       <select id="assigned_technician" name="assigned_technician" required>
-        {% for technician in technicians %}
-        <option value="{{ technician.id }}">{{ technician.name }}</option>
-        {% endfor %}</select
-      ><br />
+          {% for technician in technicians %}
+          <option value="{{ technician.name }}">{{ technician.name }}</option>
+          {% endfor %}
+      </select><br />
+      
+      
 
       <label for="attachments">Attachments:</label>
       <input type="file" id="attachments" name="attachments" /><br />
@@ -151,6 +153,11 @@
             </button>
             {% endif %}
           </td>
+
+          <td>
+            <!-- Add the print button in each row -->
+            <button onclick="printTicket('{{ ticket.id }}')">Print</button>
+        </td>
 
           <!-- Add more columns as needed -->
         </tr>
@@ -354,4 +361,16 @@
           cell.innerText = formattedDuration;
       });
   </script>
+
+# Add the JavaScript function for printing the ticket
+<script>
+  function printTicket(ticketId) {
+      // Construct the URL for printing the ticket
+      var printUrl = '/print_ticket/' + ticketId;
+
+      // Open a new window/tab for printing
+      window.open(printUrl, '_blank');
+  }
+</script>
+
 </html>

@@ -6,6 +6,7 @@ from flask import jsonify  # Import jsonify from the flask module
 from sqlalchemy import func
 from sqlalchemy import Column, Integer, String
 
+
 app = Flask(__name__)
 
 # Enable debug mode
@@ -381,7 +382,7 @@ def add_service_ticket():
     ticket_status = request.form['ticket_status']
     sales_price = request.form['sales_price']
     priority = request.form['priority']
-    assigned_technician_id = request.form['assigned_technician']
+    assigned_technician_name = request.form['assigned_technician']
     attachments = request.form['attachments']
     service_location_id = request.form['service_location']
 
@@ -404,7 +405,7 @@ def add_service_ticket():
         ticket_status=ticket_status,
         sales_price=sales_price,
         priority=priority,
-        assigned_technician=assigned_technician_id,
+        assigned_technician=assigned_technician_name,  # Store technician name instead of ID
         attachments=attachments,
         service_location=service_location_id,
         purchase_timestamp=purchase_timestamp,
@@ -739,6 +740,21 @@ def closed_service_tickets():
     closed_collected_tickets_sales_sum = sum(ticket.sales_price for ticket in closed_collected_tickets)
 
     return render_template('closed_service_tickets.html', closed_tickets=closed_tickets, closed_collected_tickets_sales_sum=closed_collected_tickets_sales_sum)
+
+# Print ticket
+@app.route('/print_ticket/<int:ticket_id>')
+def print_ticket(ticket_id):
+    # Query ticket details from the database based on ticket_id
+    ticket = ServiceTicket.query.get(ticket_id)
+
+    if ticket:
+        # Render a printable HTML template with the ticket details
+        return render_template('printable_ticket.html', ticket=ticket)
+    else:
+        # Handle case where ticket with given ID is not found
+        flash('Ticket not found.', 'error')
+        return redirect(url_for('service_tickets'))
+
 
 @app.route('/owner_collect_ticket/<int:ticket_id>', methods=['PUT'])
 def owner_collect_ticket(ticket_id):
