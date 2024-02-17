@@ -754,6 +754,23 @@ def print_ticket(ticket_id):
         # Handle case where ticket with given ID is not found
         flash('Ticket not found.', 'error')
         return redirect(url_for('service_tickets'))
+    
+# Define a route to display the closed_service_tickets.html template    
+@app.route('/reject_ticket/<int:ticket_id>', methods=['PUT'])
+def reject_ticket(ticket_id):
+    # Get the comment from the request
+    comment = request.json.get('comment')
+
+    # Update the ticket status to "rejected" and add a closed timestamp
+    ticket = ServiceTicket.query.get(ticket_id)
+    if ticket:
+        ticket.ticket_status = 'Rejected'
+        ticket.closed_timestamp = datetime.now()
+        ticket.ticket_notes = comment  # Assuming ticket_notes is the field to store comments
+        db.session.commit()
+        return jsonify({'success': True}), 200
+    else:
+        return jsonify({'success': False, 'message': 'Ticket not found'}), 404
 
 
 @app.route('/owner_collect_ticket/<int:ticket_id>', methods=['PUT'])

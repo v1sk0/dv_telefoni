@@ -151,6 +151,7 @@
             <button class="complete-button" data-ticket-id="{{ ticket.id }}">
               Complete
             </button>
+            <button class="reject-button" data-ticket-id="{{ ticket.id }}">Reject</button>
             {% endif %}
           </td>
 
@@ -158,6 +159,7 @@
             <!-- Add the print button in each row -->
             <button onclick="printTicket('{{ ticket.id }}')">Print</button>
         </td>
+        
 
           <!-- Add more columns as needed -->
         </tr>
@@ -165,7 +167,7 @@
       </tbody>
     </table>
 
-    <h1>Closed Service Tickets unpaid {{ closed_not_collected_tickets_count }} Ukupna suma {{ closed_tickets_sales_sum }}</h1>
+    <h1>Completed Service Tickets (nenaplaćeno) {{ closed_not_collected_tickets_count }} Ukupna suma {{ closed_tickets_sales_sum }}</h1>
     <table>
       <thead>
         <tr>
@@ -178,7 +180,7 @@
           <th>Opis kvara</th>
           <th>Status</th>
           <th>Complete Duration</th>
-          <th>Okvirna cena</th>
+          <th>Dogovorena cena</th>
           <th>Final Price</th>
           <th>Actions</th>
           <!-- Add more columns as needed -->
@@ -198,7 +200,7 @@
           <td>{{ ticket.comment }}</td>
           <td>{{ ticket.ticket_status }}</td>
           <td class="duration">{{ ticket.complete_duration }}</td>
-          <td>{{ ticket.sales_price }}</td>
+          <td data-sales-price-id="{{ ticket.id }}" data-sales-price="{{ ticket.sales_price }}">{{ ticket.sales_price }}</td>
 
           <td>
             <input type="number" id="final-price-{{ ticket.id }}" />
@@ -292,42 +294,43 @@
     <script>
       // JavaScript to handle "Collect" button click
       const collectButtons = document.querySelectorAll(".collect-button");
-      collectButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-              const ticketId = button.getAttribute("data-ticket-id");
-              const finalPriceInput = document.getElementById(`final-price-${ticketId}`);
-              let finalPrice = parseFloat(finalPriceInput.value);
-              
-              // Check if final price input is blank
-              if (isNaN(finalPrice) || finalPrice === 0) {
-                  // Use predefined price if final price input is blank
-                  finalPrice = parseFloat(finalPriceInput.getAttribute("data-predefined-price"));
-              }
-  
-              if (confirm(`Are you sure you want to collect this ticket with a final price of $${finalPrice.toFixed(2)}?`)) {
-                  fetch(`/collect_ticket/${ticketId}`, {
-                      method: "PUT",
-                      headers: {
-                          "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify({ finalPrice }),
-                  })
-                  .then((response) => response.json())
-                  .then((data) => {
-                      if (data.success) {
-                          alert("Ticket collected successfully.");
-                          // Reload the page to refresh the tables
-                          window.location.reload();
-                      } else {
-                          alert("Failed to collect ticket.");
-                      }
-                  })
-                  .catch((error) => {
-                      console.error("Error:", error);
-                  });
-              }
-          });
-      });
+collectButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        const ticketId = button.getAttribute("data-ticket-id");
+        const finalPriceInput = document.getElementById(`final-price-${ticketId}`);
+        let finalPrice = parseFloat(finalPriceInput.value);
+
+        // Check if final price input is blank
+        if (isNaN(finalPrice) || finalPrice === 0) {
+            // Use sales price if final price input is blank
+            const salesPriceElement = document.querySelector(`td[data-sales-price-id='${ticketId}']`);
+            finalPrice = parseFloat(salesPriceElement.getAttribute("data-sales-price"));
+        }
+
+        if (confirm(`Are you sure you want to collect this ticket with a final price of $${finalPrice.toFixed(2)}?`)) {
+            fetch(`/collect_ticket/${ticketId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ finalPrice }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    alert("Ticket collected successfully.");
+                    // Reload the page to refresh the tables
+                    window.location.reload();
+                } else {
+                    alert("Failed to collect ticket.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+        }
+    });
+});
   </script>
   
     <script>
@@ -362,7 +365,7 @@
       });
   </script>
 
-# Add the JavaScript function for printing the ticket
+
 <script>
   function printTicket(ticketId) {
       // Construct the URL for printing the ticket
@@ -371,6 +374,42 @@
       // Open a new window/tab for printing
       window.open(printUrl, '_blank');
   }
+</script>
+
+<script>
+  // JavaScript to handle "Reject" button click
+  const rejectButtons = document.querySelectorAll(".reject-button");
+  rejectButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+          if (confirm("Are you sure you want to reject this ticket?")) {
+              const ticketId = button.getAttribute("data-ticket-id");
+              const comment = prompt("Please enter a rejection comment:");
+              if (comment !== null) {
+                  // Send a request to update the ticket status, add a closed timestamp, and store the comment
+                  fetch(`/reject_ticket/${ticketId}`, {
+                      method: "PUT",
+                      headers: {
+                          "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({ comment }),
+                  })
+                  .then((response) => response.json())
+                  .then((data) => {
+                      if (data.success) {
+                          alert("Ticket rejected successfully.");
+                          // Reload the page to refresh the table
+                          window.location.reload();
+                      } else {
+                          alert("Failed to reject ticket.");
+                      }
+                  })
+                  .catch((error) => {
+                      console.error("Error:", error);
+                  });
+              }
+          }
+      });
+  });
 </script>
 
 </html>
