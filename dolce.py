@@ -5,9 +5,26 @@ from flask_migrate import Migrate
 from flask import jsonify  # Import jsonify from the flask module
 from sqlalchemy import func
 from sqlalchemy import Column, Integer, String
+from flask import request
+import os
+import configparser
 
 
 app = Flask(__name__)
+
+
+
+# Definise tekst za Print ticket klauzolu
+app.config['COMMENT_CLAUSE'] = 'TEST KLAUZOLA ZA PRINT.'
+app.config['IME_KOMPANIJE'] = 'Your company name'
+app.config['ADRESA'] = 'Your company address'
+app.config['PIB'] = '123456789'  # Example PIB (9 numbers)
+app.config['MATICNI_BROJ'] = '12345678'  # Example Maticni broj (8 digits)
+app.config['SIFRA_DELATNOSTI'] = '123456'  # Example Šifra delatnosti (up to 6 digits)
+app.config['OBAVEZNIK_PDV'] = True  # Example Obaveznik PDV: Da (True) or Ne (False)
+app.config['BROJ_TELEFONA'] = '+1234567890'  # Example phone number
+app.config['MAIL'] = 'example@example.com'  # Example email
+app.config['POSLOVNA_BANKA'] = 'Bank name - account number'  # Example Poslovna Banka
 
 # Enable debug mode
 app.debug = True
@@ -175,7 +192,7 @@ class ServiceLocation(db.Model):
         self.address = address
         self.contact_phone = contact_phone
 
-# define a function to get the next ticket number
+# definise funkciju za prikazivanje sledeceg racuna
 def get_next_ticket_number():
     latest_ticket = db.session.query(func.max(ServiceTicket.service_ticket_nr)).scalar()
     
@@ -183,8 +200,28 @@ def get_next_ticket_number():
         return latest_ticket + 1
     else:
         return 0  # Start from 0 if no tickets exist yet
+    
+    
+# Ucivatvanje konfiguracije iz config.ini fajla
+def load_config_from_ini():
+    config = configparser.ConfigParser()
+    config_file_path = os.path.join(app.root_path, 'config.ini')
+    config.read(config_file_path)
 
-
+    if 'COMPANY' in config:
+        app.config['IME_KOMPANIJE'] = config['COMPANY'].get('ime_kompanije', 'Your company name')
+        app.config['ADRESA'] = config['COMPANY'].get('adresa', 'Your company address')
+        app.config['PIB'] = config['COMPANY'].get('pib', '123456789')
+        app.config['MATICNI_BROJ'] = config['COMPANY'].get('maticni_broj', '12345678')
+        app.config['SIFRA_DELATNOSTI'] = config['COMPANY'].get('sifra_delatnosti', '123456')
+        app.config['OBAVEZNIK_PDV'] = config['COMPANY'].getboolean('obaveznik_pdv', True)
+        app.config['BROJ_TELEFONA'] = config['COMPANY'].get('broj_telefona', '+1234567890')
+        app.config['MAIL'] = config['COMPANY'].get('mail', 'example@example.com')
+        app.config['POSLOVNA_BANKA'] = config['COMPANY'].get('poslovna_banka', 'Bank name - account number')
+    
+    if 'KLAUZOLA' in config:    
+        app.config['COMMENT_CLAUSE'] = config['KLAUZOLA'].get('comment_clause', 'DODAJ KLAUZOLU ZA PRINT.')
+load_config_from_ini()
 
 
 # Helper function to get the current time with timezone
@@ -215,9 +252,11 @@ def get_closed_collected_tickets():
         print(f"Error while fetching closed collected tickets: {str(e)}")
         return []
 
+
+
+
+
 # Additional database operations or functions can be defined here
-
-
 
 
 
@@ -257,7 +296,7 @@ def setup_form():
     technicians = Technician.query.all()
     service_locations = ServiceLocation.query.all()  # Query the service locations
     
-    return render_template('setup_form.html', technicians=technicians, service_locations=service_locations)
+    return render_template('setup_form.html', technicians=technicians, service_locations=service_locations, app=app)
 
 
 # Define a route for removing a technician
@@ -320,6 +359,60 @@ def spare_parts():
     return render_template('spare_parts.html', spare_parts=spare_parts)
 
 
+# update route for Setup form general settings
+@app.route('/update_config', methods=['POST'])
+def update_config():
+    # Get the form data
+    ime_kompanije = request.form.get('ime_kompanije')
+    adresa = request.form.get('adresa')
+    pib = request.form.get('pib')
+    maticni_broj = request.form.get('maticni_broj')
+    sifra_delatnosti = request.form.get('sifra_delatnosti')
+    obaveznik_pdv = request.form.get('obaveznik_pdv')
+    broj_telefona = request.form.get('broj_telefona')
+    mail = request.form.get('mail')
+    poslovna_banka = request.form.get('poslovna_banka')
+    
+    # Retrieve the comment clause from the form data
+    comment_clause = request.form.get('comment_clause')
+
+    # Convert obaveznik_pdv to boolean
+    obaveznik_pdv = obaveznik_pdv == 'True'
+
+    # Update app.config properties
+    app.config['IME_KOMPANIJE'] = ime_kompanije
+    app.config['ADRESA'] = adresa
+    app.config['PIB'] = pib
+    app.config['MATICNI_BROJ'] = maticni_broj
+    app.config['SIFRA_DELATNOSTI'] = sifra_delatnosti
+    app.config['OBAVEZNIK_PDV'] = obaveznik_pdv
+    app.config['BROJ_TELEFONA'] = broj_telefona
+    app.config['MAIL'] = mail
+    app.config['POSLOVNA_BANKA'] = poslovna_banka
+    # Update the COMMENT_CLAUSE property
+    app.config['COMMENT_CLAUSE'] = comment_clause
+
+    # Save changes to the configuration file
+    config = configparser.ConfigParser()
+    config['COMPANY'] = {
+        'ime_kompanije': str(ime_kompanije),
+        'adresa': str(adresa),
+        'pib': str(pib),
+        'maticni_broj': str(maticni_broj),
+        'sifra_delatnosti': str(sifra_delatnosti),
+        'obaveznik_pdv': str(obaveznik_pdv),
+        'broj_telefona': str(broj_telefona),
+        'mail': str(mail),
+        'poslovna_banka': str(poslovna_banka)
+    }
+    config['KLAUZOLA'] = {
+        'comment_clause': str(comment_clause)
+    }
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
+
+    # Redirect to the setup form or any other page
+    return redirect(url_for('setup_form'))
 
 
 # Tabela servisnih naloga (Service tickets)
@@ -745,16 +838,33 @@ def closed_service_tickets():
 @app.route('/print_ticket/<int:ticket_id>')
 def print_ticket(ticket_id):
     # Query ticket details from the database based on ticket_id
-    ticket = ServiceTicket.query.get(ticket_id)
+    ticket = ServiceTicket.query.get(ticket_id)  # Assuming Ticket is your SQLAlchemy model for tickets
 
     if ticket:
-        # Render a printable HTML template with the ticket details
-        return render_template('printable_ticket.html', ticket=ticket)
+        # Pass the ticket and app object to the template context
+        return render_template('printable_ticket.html', ticket=ticket, app=app)
     else:
         # Handle case where ticket with given ID is not found
         flash('Ticket not found.', 'error')
         return redirect(url_for('service_tickets'))
     
+@app.route('/update_comment_clause', methods=['POST'])
+def update_comment_clause():
+    new_comment_clause = request.form['comment_clause']
+    app.config['DEFAULT_COMMENT_CLAUSE'] = new_comment_clause
+
+    # Save the updated comment clause text to a config INI file
+    config = configparser.ConfigParser()
+    config.read('config.ini')  # Replace with the path to your config INI file
+    if 'KLAUZOLA' not in config.sections():
+        config.add_section('KLAUZOLA')
+    config.set('KLAUZOLA', 'comment_clause', new_comment_clause)
+    with open('config.ini', 'w') as configfile:  # Replace with the path to your config INI file
+        config.write(configfile)
+
+    return redirect(url_for('setup_form'))
+
+
 # Define a route to display the closed_service_tickets.html template    
 @app.route('/reject_ticket/<int:ticket_id>', methods=['PUT'])
 def reject_ticket(ticket_id):
