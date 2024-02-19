@@ -3,6 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap5.css"
+      rel="stylesheet"
+    />
+
     <title>Printable Ticket</title>
     <style>
       /* Define your CSS styles for the printable ticket here */
@@ -31,27 +40,104 @@
     </style>
   </head>
   <body>
-    <div class="ticket-container">
-      <div class="ticket-header">
-        <h1>Service Ticket</h1>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="ticket-container">
+          <header class="company-header" style="text-align: center">
+            <div class="company-logo">
+              <img
+                src="/static/images/dolce_vita_logo.png"
+                alt="Company Logo"
+                style="width: 12%; height: auto"
+              />
+            </div>
+            <div class="company-info">
+              <h1>Dolce Vita servis i usluge</h1>
+              <p>Pavla Vuisica 44 Zemun Altina</p>
+              <p>0649090060</p>
+            </div>
+          </header>
+          <div class="ticket-header">
+            <h1>Servisni nalog</h1>
+          </div>
+          <div class="ticket-details">
+            <h2>Broj Naloga: {{ ticket.service_ticket_nr }}</h2>
+            <p>Datum prijema : {{ ticket.date }}</p>
+            <p>Ime i prezime mušterije: {{ ticket.customer_name }}</p>
+            <p>Kontakt telefon: {{ ticket.customer_contact }}</p>
+            <!-- Add more ticket details as needed -->
+            <p>Servis kategorija: {{ ticket.service_section }}</p>
+            <p>Brand: {{ ticket.brand }}</p>
+            <p>Model: {{ ticket.model }}</p>
+            <p>Opis kvara: {{ ticket.comment }}</p>
+            <p>Status: {{ ticket.ticket_status }}</p>
+            <p>Okvirna cena: {{ ticket.sales_price }}</p>
+            <p>Prioritet: {{ ticket.priority }}</p>
+            <p>Serviser: {{ ticket.assigned_technician }}</p>
+            <h2>Klauzola firme</h2>
+            <p>{{ app.config['COMMENT_CLAUSE'] }}</p>
+            <!-- Add more ticket details as needed -->
+          </div>
+        </div>
       </div>
-      <div class="ticket-details">
-        <h2>Ticket Number: {{ ticket.service_ticket_nr }}</h2>
-        <p>Date: {{ ticket.date }}</p>
-        <p>Customer Name: {{ ticket.customer_name }}</p>
-        <!-- Add more ticket details as needed -->
-        <p>Service Section: {{ ticket.service_section }}</p>
-        <p>Brand: {{ ticket.brand }}</p>
-        <p>Model: {{ ticket.model }}</p>
-        <p>Description: {{ ticket.comment }}</p>
-        <p>Status: {{ ticket.ticket_status }}</p>
-        <p>Sales Price: {{ ticket.sales_price }}</p>
-        <p>Priority: {{ ticket.priority }}</p>
-        <p>Assigned Technician: {{ ticket.assigned_technician }}</p>
-        <h2>Comment Clause</h2>
-        <p>{{ app.config['COMMENT_CLAUSE'] }}</p>
-        <!-- Add more ticket details as needed -->
+      <div class="col-md-4">
+        <div class="ticket-container">
+          <header class="company-header" style="text-align: center">
+            <div class="company-logo">
+              <img
+                src="/static/images/dolce_vita_logo.png"
+                alt="Company Logo"
+                style="width: 12%; height: auto"
+              />
+            </div>
+            <div class="company-info">
+              <h1>Dolce Vita servis i usluge</h1>
+              <p>Pavla Vuisica 44 Zemun Altina</p>
+              <p>0649090060</p>
+            </div>
+          </header>
+          <div class="ticket-header">
+            <h1>Servisni nalog</h1>
+          </div>
+          <div class="ticket-details">
+            <h2>Broj Naloga: {{ ticket.service_ticket_nr }}</h2>
+            <p>Datum prijema : {{ ticket.date }}</p>
+            <p>Ime i prezime mušterije: {{ ticket.customer_name }}</p>
+            <p>Kontakt telefon: {{ ticket.customer_contact }}</p>
+            <!-- Add more ticket details as needed -->
+            <p>Servis kategorija: {{ ticket.service_section }}</p>
+            <p>Brand: {{ ticket.brand }}</p>
+            <p>Model: {{ ticket.model }}</p>
+            <p>Opis kvara: {{ ticket.comment }}</p>
+            <p>Status: {{ ticket.ticket_status }}</p>
+            <p>Okvirna cena: {{ ticket.sales_price }}</p>
+            <p>Prioritet: {{ ticket.priority }}</p>
+            <p>Serviser: {{ ticket.assigned_technician }}</p>
+            <h2>Klauzola firme</h2>
+            <p>{{ app.config['COMMENT_CLAUSE'] }}</p>
+            <!-- Add more ticket details as needed -->
+          </div>
+        </div>
       </div>
     </div>
   </body>
+  <script
+    type="text/javascript"
+    src="https://code.jquery.com/jquery-3.7.1.js"
+  ></script>
+
+  <script
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"
+  ></script>
+
+  <script
+    type="text/javascript"
+    src="https://cdn.datatables.net/2.0.0/js/dataTables.js"
+  ></script>
+
+  <script
+    type="text/javascript"
+    src="https://cdn.datatables.net/2.0.0/js/dataTables.bootstrap5.js"
+  ></script>
 </html>

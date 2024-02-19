@@ -1,0 +1,71 @@
+{% extends "base_layout.html" %} {% block title %}Welcome{% endblock %} {% block
+head %} {{ super() }} {% endblock %} {% block content %}
+
+<div>Dolce Vita Lager telefona</div>
+
+<div class="container">
+  <div>
+    <h2 style="display: inline">
+      Telefoni na lageru : {{ unsold_phone_count }} kom
+    </h2>
+    <h2 style="display: inline; margin-left: 20px">
+      Suma Preporučenih Cena: {{suma_neprodatih_telefona}} €
+    </h2>
+  </div>
+
+  <table id="myTable" class="table table-hover table-striped">
+    <thead>
+      <tr>
+        <th>Datum nabavke</th>
+        <th>Brend</th>
+        <th>Model</th>
+        <th>IMEI</th>
+        <th>Boja</th>
+        <th>Kapacitet</th>
+        <th>Stanje</th>
+        <th>Komentar</th>
+        <th>Preporučena prodajna cena</th>
+        <th>Vreme u prodaji</th>
+        <th>Prodaj po ceni</th>
+      </tr>
+    </thead>
+    <tbody style="vertical-align: middle">
+      {% for phone in phone_listings %}
+      <tr
+        data-search="{{ phone.brand }} {{ phone.model }} {{ phone.imei }} {{ phone.color }} {{ phone.capacity }} {{ phone.condition }} {{ phone.comment }} {{ phone.sales_price }} "
+      >
+        <td>{{ phone.purchase_timestamp.strftime('%Hh:%Mm %d-%m-%Y ') }}</td>
+        <td>{{ phone.brand }}</td>
+        <td>{{ phone.model }}</td>
+        <td>{{ phone.imei }}</td>
+        <td>{{ phone.color }}</td>
+        <td>{{ phone.capacity }}</td>
+        <td>{{ phone.condition }}</td>
+        <td>{{ phone.comment }}</td>
+        <td>{{ phone.sales_price }} €</td>
+        <td>
+          {{ (current_time - phone.purchase_timestamp ).days }} dana, {{ (
+          current_time - phone.purchase_timestamp).seconds // 3600 }}h
+        </td>
+        <td>
+          <form
+            method="POST"
+            action="/sell_phone/{{ phone.id }}"
+            onsubmit="return confirmSell()"
+          >
+            <input
+              type="number"
+              name="price"
+              placeholder="Sell Price"
+              required
+              step="1"
+            />
+            <input type="submit" value="Sell" class="btn btn-success" />
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %} {% block js %} {{ super() }} {% endblock %}

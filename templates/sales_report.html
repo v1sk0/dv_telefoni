@@ -1,212 +1,251 @@
-<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap5.css"
+      rel="stylesheet"
+    />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dolce Vita Phone Inventory Management</title>
+    <title>Dolce Vita lager telefona</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+      /* Center-align text in header and footer cells */
+      table.dataTable thead th,
+      table.dataTable thead td,
+      table.dataTable tfoot th,
+      table.dataTable tfoot td {
+        text-align: center !important; /* Override default alignment */
+      }
 
-        header {
-            background-color: #f0f0f0;
-            padding: 20px;
-            text-align: center;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
 
-        nav {
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-        }
+      header {
+        background-color: #f0f0f0;
+        padding: 20px;
+        text-align: center;
+      }
 
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 20px;
-        }
+      nav {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+      }
 
-        .container {
-            max-width: fit-content;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-        }
+      nav a {
+        color: #fff;
+        text-decoration: none;
+        margin: 0 20px;
+      }
 
-        /* Remove Bootstrap table classes */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+      .container {
+        max-width: fit-content;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        text-align: center;
+      }
 
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
+      form {
+        display: inline-block;
+      }
 
-        th {
-            background-color: #333;
-            color: #fff;
-        }
+      input[type="number"] {
+        width: 80px;
+        padding: 5px;
+      }
 
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+      .btn {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
 
-        form {
-            display: inline-block;
-        }
+      .btn-success {
+        background-color: #28a745;
+        margin: 5px;
+      }
+      .centered-table td {
+        text-align: center; /* Center horizontally */
+        vertical-align: middle; /* Center vertically */}
 
-        input[type="number"] {
-            width: 80px;
-            padding: 5px;
-        }
 
-        .btn {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-
-        .btn-success {
-            background-color: #28a745;
-        }
-
-        .sbox {
-            position: relative;
-            float: left;
-            border: 2px solid #003B62;
-            font-family: verdana;
-            background-color: #B5CFE0;
-            padding-left: 10px;
-            margin-bottom: 25px;
-        }
-
-        .dataTables_wrapper {
-            margin-top: 20px;
-        }
-
-        .dataTables_length {
-            margin-right: 20px;
-        }
+      .dt-type-numeric {
+        text-align: center;
+      }
     </style>
 
-    <!-- Include DataTables CSS and JS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.6/css/jquery.dataTables.min.css">
-</head>
-
-<body>
+  <body>
     <header>
-        <h1>Dolce Vita Phone Inventory</h1>
+      <h1>Dolce Vita Lager telefona</h1>
     </header>
     <nav>
-        <a href="/">Home</a>
-        <a href="/sales_report">Izveštaj prodatih Telefona</a>
-        <a href="/add_listing">Dodaj Telefon</a>
+      <a href="/">Home</a>
+      <a href="/phone_list">Telefoni na lageru</a>
+      <a href="/sales_report">Izveštaj prodatih Telefona</a>
+      <a href="/add_listing">Dodaj Telefon</a>
     </nav>
 
     <!-- Main Content -->
     <div class="container mt-5">
-        <h1>Izveštaj prodatih Telefona</h1>
-        <div>
-            <p><b>Total Sales Price for Not Collected Phones:</b> {{ total_sales_price_not_collected }} €</p>
-            <p><b>Total Sold Phones Not Collected:</b> {{ count_sold_not_collected }}</p>
-        </div>
+      <h1>Izveštaj prodatih Telefona</h1>
+      <div>
+        <p>
+          <b>Total Sales Price for Not Collected Phones:</b> {{
+          total_sales_price_not_collected }} €
+        </p>
+        <p>
+          <b>Total Sold Phones Not Collected:</b> {{ count_sold_not_collected }}
+        </p>
+      </div>
 
-        <!-- Search Box -->
-        <div class="sbox">
-            <label for="search">Pretraži:</label>
-            <input type="text" id="search" onkeyup="filterTable()" placeholder="Enter keywords...">
-        </div>
 
-        <table id="phone-listings" class="display">
-            <thead>
-                <tr>
-                    <th>Brend</th>
-                    <th>Model</th>
-                    <th>IMEI</th>
-                    <th>Boja</th>
-                    <th>Kapacitet</th>
-                    <th>Stanje</th>
-                    <th>Komentar</th>
-                    <th>Prodajna cena</th>
-                    <th>Vreme prodaje</th>
-                    <th>Dobavljač</th>
-                    <th>LK Dobavljača</th>
-                    <th>Kontakt Dobavljača</th>
-                    <th>Blagajna</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for phone in sold_phones %}
-                <tr
-                    data-search="{{ phone.brand }} {{ phone.model }} {{ phone.imei }} {{ phone.color }} {{ phone.capacity }} {{ phone.condition }} {{ phone.comment }} {{ phone.sales_price }} {{ phone.sale_timestamp.strftime('%m:%H %d.%m.%Y') if phone.sale_timestamp else '' }} {{ phone.supplier_name }} {{ phone.supplier_id_card }} {{ phone.supplier_mobile }}">
-                    <td>{{ phone.brand }}</td>
-                    <td>{{ phone.model }}</td>
-                    <td>{{ phone.imei }}</td>
-                    <td>{{ phone.color }}</td>
-                    <td>{{ phone.capacity }}</td>
-                    <td>{{ phone.condition }}</td>
-                    <td>{{ phone.comment }}</td>
-                    <td>{{ phone.sales_price }} €</td>
-                    <td>{{ phone.sale_timestamp.strftime('%H:%M %d.%m.%Y') if phone.sale_timestamp else '' }}</td>
-                    <td>{{ phone.supplier_name }}</td>
-                    <td>{{ phone.supplier_id_card }}</td>
-                    <td>{{ phone.supplier_mobile }}</td>
-                    <td>
-                        {% if phone.collected %}
-                        <span class="text-success">Collected</span>
-                        {% else %}
-                        <form onsubmit="return confirm('Are you sure you want to collect this phone?');"
-                            action="/collect_phone/{{ phone.id }}" method="POST">
-                            <button type="submit" class="btn btn-primary">Collect</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+   
+
+      <table id="myTable" class="table table-hover table-striped border border-dark centered-table">
+        <thead>
+          <tr>
+            <th>Brend</th>
+            <th>Model</th>
+            <th>IMEI</th>
+            <th>Boja</th>
+            <th>Kapacitet</th>
+            <th>Stanje</th>
+            <th>Komentar</th>
+            <th>Prodajna cena</th>
+            <th>Vreme prodaje</th>
+            <th>Dobavljač</th>
+            <th>LK Dobavljača</th>
+            <th>Kontakt Dobavljača</th>
+            <th>Blagajna</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for phone in sold_phones %}
+          <tr
+            data-search="{{ phone.brand }} {{ phone.model }} {{ phone.imei }} {{ phone.color }} {{ phone.capacity }} {{ phone.condition }} {{ phone.comment }} {{ phone.sales_price }} {{ phone.sale_timestamp.strftime('%m:%H %d.%m.%Y') if phone.sale_timestamp else '' }} {{ phone.supplier_name }} {{ phone.supplier_id_card }} {{ phone.supplier_mobile }}"
+          >
+            <td>{{ phone.brand }}</td>
+            <td>{{ phone.model }}</td>
+            <td>{{ phone.imei }}</td>
+            <td>{{ phone.color }}</td>
+            <td>{{ phone.capacity }}</td>
+            <td>{{ phone.condition }}</td>
+            <td>{{ phone.comment }}</td>
+            <td>{{ phone.sales_price }} €</td>
+            <td>
+              {{ phone.sale_timestamp.strftime('%H:%M %d.%m.%Y') if
+              phone.sale_timestamp else '' }}
+            </td>
+            <td>{{ phone.supplier_name }}</td>
+            <td>{{ phone.supplier_id_card }}</td>
+            <td>{{ phone.supplier_mobile }}</td>
+            <td>
+              {% if phone.collected %}
+              <span class="text-success">Collected</span>
+              {% else %}
+              <form
+                onsubmit="return confirm('Are you sure you want to collect this phone?');"
+                action="/collect_phone/{{ phone.id }}"
+                method="POST"
+                style="display: inline;"
+              >
+                <button type="submit" class="btn btn-primary">Collect</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
 
-    <!-- Include jQuery and DataTables JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.6/js/jquery.dataTables.min.js"></script>
+    <script
+    type="text/javascript"
+    src="https://code.jquery.com/jquery-3.7.1.js"
+  ></script>
 
-    <!-- DataTables Initialization -->
+  <script
+    type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"
+  ></script>
+
+  <script
+    type="text/javascript"
+    src="https://cdn.datatables.net/2.0.0/js/dataTables.js"
+  ></script>
+
+  <script
+    type="text/javascript"
+    src="https://cdn.datatables.net/2.0.0/js/dataTables.bootstrap5.js"
+  ></script>
+
+  <script>
+    $(document).ready(function () {
+      $("#myTable").DataTable({
+        info: true,
+        ordering: true,
+        paging: true,
+        scrollCollapse: true,
+        searching: true,
+        lengthChange: true,
+        columnDefs: [
+          { type: "numeric", targets: "_all" },
+          { className: "", targets: "_all" }, // Remove the dt-type-numeric class
+        ],
+        lengthMenu: [5, 10, 25, 50, 100],
+        pageLength: 10,
+        language: {
+          search: "Pretraži:",
+          lengthMenu: "Prikaži _MENU_ unosa po strani",
+          info: "Prikazano _START_ do _END_ od ukupno _TOTAL_ unosa",
+          infoEmpty: "Prikazano 0 do 0 od ukupno 0 unosa",
+          infoFiltered: "(filtrirano od ukupno _MAX_ unosa)",
+          paginate: {
+            first: "Prva",
+            last: "Poslednja",
+            next: "Sledeća",
+            previous: "Prethodna",
+          },
+        },
+      });
+    });
+  </script>
     <script>
-        function filterTable() {
-            var input, filter, table, tr, td, i, txtValue;
-            input = document.getElementById("search");
-            filter = input.value.toLowerCase();
-            table = document.querySelector("#phone-listings");
-            tr = table.querySelectorAll("tr");
+      function filterTable() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("search");
+        filter = input.value.toLowerCase();
+        table = document.querySelector("#phone-listings");
+        tr = table.querySelectorAll("tr");
 
-            for (i = 0; i < tr.length; i++) {
-                td = tr[i].getAttribute("data-search");
-                if (td) {
-                    txtValue = td.toLowerCase();
-                    if (txtValue.indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
-                }
+        for (i = 0; i < tr.length; i++) {
+          td = tr[i].getAttribute("data-search");
+          if (td) {
+            txtValue = td.toLowerCase();
+            if (txtValue.indexOf(filter) > -1) {
+              tr[i].style.display = "";
+            } else {
+              tr[i].style.display = "none";
             }
+          }
         }
+      }
 
-        $(document).ready(function () {
-            $('#phone-listings').DataTable({
-                "order": [],
-            });
+      $(document).ready(function () {
+        $("#phone-listings").DataTable({
+          order: [],
         });
+      });
     </script>
-</body>
-
+  </body>
 </html>

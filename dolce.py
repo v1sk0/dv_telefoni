@@ -8,11 +8,13 @@ from sqlalchemy import Column, Integer, String
 from flask import request
 import os
 import configparser
-
+from configparser import ConfigParser
 
 app = Flask(__name__)
 
-
+# Load configuration from config.ini file
+config = ConfigParser()
+config.read('config.ini')
 
 # Definise tekst za Print ticket klauzolu
 app.config['COMMENT_CLAUSE'] = 'TEST KLAUZOLA ZA PRINT.'
@@ -25,6 +27,7 @@ app.config['OBAVEZNIK_PDV'] = True  # Example Obaveznik PDV: Da (True) or Ne (Fa
 app.config['BROJ_TELEFONA'] = '+1234567890'  # Example phone number
 app.config['MAIL'] = 'example@example.com'  # Example email
 app.config['POSLOVNA_BANKA'] = 'Bank name - account number'  # Example Poslovna Banka
+
 
 # Enable debug mode
 app.debug = True
@@ -253,8 +256,23 @@ def get_closed_collected_tickets():
         return []
 
 
+# definise funkciju za brojanje neprodatih telefona
+def count_unsold_phones():
+    # Perform a query to count unsold phones
+    unsold_phone_count = PhoneListing.query.filter_by(sold=0).count()
+    return unsold_phone_count
 
+# definise funkciju za sumiranje prodajne cene za neprodate telefone
+def sum_sales_price_for_unsold_phones():
+    # Perform a query to sum sales_price for phones with sold status equal to 0
+    Phone_on_stock_sales_price = db.session.query(db.func.sum(PhoneListing.sales_price)).filter(PhoneListing.sold == 0).scalar()
+    return Phone_on_stock_sales_price or 0  # If there are no unsold phones, return 0
 
+# definise funkciju za brojanje zatvorenih naloga nenaplacenih iz baze
+def count_closed_tickets_not_collected():
+    # Perform a query to count tickets with closed status and collected = 0
+    ticket_count = db.session.query(ServiceTicket).filter(ServiceTicket.ticket_status == 'Closed', ServiceTicket.collected == 0).count()
+    return ticket_count
 
 # Additional database operations or functions can be defined here
 
@@ -283,6 +301,7 @@ def add_technician():
         return redirect(url_for('setup_form'))
 
     return render_template('setup_form.html')
+
 # Tabela Tehnicara (Technicians list)
 @app.route('/list_technicians')
 def list_technicians():
@@ -337,6 +356,8 @@ def list_service_locations():
     
     # Render the template and pass the data to it
     return render_template('setup_form.html', service_locations=service_locations)
+
+
 # Define a route for removing a service location
 @app.route('/remove_service_location/<int:location_id>', methods=['POST'])
 def remove_service_location(location_id):
@@ -359,7 +380,6 @@ def spare_parts():
     return render_template('spare_parts.html', spare_parts=spare_parts)
 
 
-# update route for Setup form general settings
 @app.route('/update_config', methods=['POST'])
 def update_config():
     # Get the form data
@@ -410,10 +430,12 @@ def update_config():
     }
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
+        
+    # Reload configuration
+    app.config.update(request.form)
 
     # Redirect to the setup form or any other page
     return redirect(url_for('setup_form'))
-
 
 # Tabela servisnih naloga (Service tickets)
 @app.route('/service_tickets')
@@ -512,7 +534,10 @@ def add_service_ticket():
     flash('Service ticket added successfully', 'success')
     return redirect(url_for('service_tickets'))
 
-
+# ruta za definisanje static foldera
+@app.route('/static/<path:resource>')
+def serveStaticResource(resource):
+    return send_from_directory('static', resource)
 
 
 
@@ -523,33 +548,40 @@ def computer_listings():
     return render_template('computer_listings.html', computer_listings=computer_listings)
 
 
-# Main page "index.html"
-@app.route('/')
-def index():
+# Phone listings "phone_list.html
+@app.route('/phone_list')
+def phone_list():
     phone_listings = PhoneListing.query.filter_by(sold=False).all()
     current_time = get_current_time()
     current_time_plus_one_hour = current_time + timedelta(hours=1) #dodaje 1 sat za nasu vremensku zonu
-
+    unsold_phone_count = count_unsold_phones()  # Funkcija za brojanje neprodatih telefona
+    suma_neprodatih_telefona = sum_sales_price_for_unsold_phones()
+    
 # Make purchase_timestamp offset-aware for each phone listing
     for phone in phone_listings:
         phone.purchase_timestamp = phone.purchase_timestamp.replace(tzinfo=timezone.utc)
 
-    return render_template('index.html', phone_listings=phone_listings, current_time=current_time_plus_one_hour)
+    return render_template('phone_list.html', phone_listings=phone_listings, current_time=current_time_plus_one_hour, unsold_phone_count=unsold_phone_count ,suma_neprodatih_telefona=suma_neprodatih_telefona)
 
+@app.route('/')
+def index():
+    open_tickets_count_sum = (ServiceTicket.query.filter_by(ticket_status='Open').count())
+    unsold_phone_count = count_unsold_phones()  # Funkcija za brojanje neprodatih telefona
+    closed_tickets_uncollected_count = count_closed_tickets_not_collected()
+    
+    return render_template('index.html', unsold_phone_count=unsold_phone_count , open_tickets_count_sum=open_tickets_count_sum , closed_tickets_uncollected_count=closed_tickets_uncollected_count , ime_kompanije=config['COMPANY']['ime_kompanije']) 
 
+@app.route('/forms')
+def forms():
+    return render_template('forms.html')
 
-
+@app.route('/tables')
+def tables():
+    return render_template('tables.html')
 
     
 
-@app.route('/phones_on_stock')
-def phones_on_stock():
-    phone_listings = PhoneListing.query.filter_by(sold=False).all()
-    current_time = get_current_time()
-    current_time_plus_one_hour = current_time + timedelta(hours=1) #dodaje 1 sat za nasu vremensku zonu
-    return render_template('phones_on_stock.html', phone_listings=phone_listings, current_time=current_time_plus_one_hour)
-
-
+# Kalkulator statistike za prodate telefone danas / ovu nedelju / ovaj mesec
 def calculate_statistics(time_frame):
     current_time = get_current_time()
     sold_phones = PhoneListing.query.filter_by(sold=True).all()
@@ -904,6 +936,17 @@ def owner_collect_ticket(ticket_id):
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': 'Ticket not found'}), 404
+
+  # Define route for rendering base_layout.html
+@app.route('/base_layout')
+def base_layout():
+    return render_template('base_layout.html', ime_kompanije=config['COMPANY']['ime_kompanije'])
+
+  # Define route for rendering test.html
+@app.route('/test')
+def test():
+    return render_template('test.html', ime_kompanije=config['COMPANY']['ime_kompanije'])
+
 
 if __name__ == '__main__':
     app.run(debug=True)

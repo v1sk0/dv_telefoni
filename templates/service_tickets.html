@@ -1,127 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Service Tickets</title>
+  <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap5.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Center-align text in header and footer cells */
+      table.dataTable thead th,
+      table.dataTable thead td,
+      table.dataTable tfoot th,
+      table.dataTable tfoot td {
+        text-align: center !important; /* Override default alignment */
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: #f0f0f0;
+        padding: 20px;
+        text-align: center;
+      }
+
+      nav {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+      }
+
+      nav a {
+        color: #fff;
+        text-decoration: none;
+        margin: 0 20px;
+      }
+
+      .container {
+        max-width: fit-content;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        text-align: center;
+      }
+
+      form {
+        display: inline-block;
+      }
+
+      input[type="number"] {
+        width: 80px;
+        padding: 5px;
+      }
+
+      .btn {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+
+      .btn-success {
+        background-color: #28a745;
+        margin: 5px;
+      }
+      .centered-table td {
+        text-align: center; /* Center horizontally */
+        vertical-align: middle; /* Center vertically */}
+
+
+      .dt-type-numeric {
+        text-align: center;
+      }
+    </style>
   </head>
+  <header>
+    <h1>Dolce Vita Lager telefona</h1>
+  </header>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/phone_list">Telefoni na lageru</a>
+    <a href="/sales_report">Izveštaj prodatih Telefona</a>
+    <a href="/add_listing">Dodaj Telefon</a>
+  </nav>
+
   <body>
-    <h1>Service Tickets</h1>
-    <form action="/add_service_ticket" method="POST">
-      <label for="customer_name">Customer Name:</label>
-      <input
-        type="text"
-        id="customer_name"
-        name="customer_name"
-        required
-      /><br />
+    <div class="row">
+      <div class="col-md-3">
+        
+    <div class="container mt-3 shadow">
+      <h1>Novi Servisni nalog</h1>
+      <form action="/add_service_ticket" method="POST">
+          <div class="form-group">
+              <label for="customer_name">Ime i prezime:</label>
+              <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+          </div>
+  
+          <div class="form-group">
+              <label for="customer_contact">Kontakt telefon:</label>
+              <input type="text" class="form-control" id="customer_contact" name="customer_contact" required>
+          </div>
+  
+          <div class="form-group">
+              <label for="customer_email">Email:</label>
+              <input type="email" class="form-control" id="customer_email" name="customer_email">
+          </div>
+  
+          <div class="form-group">
+              <label for="customer_company_name">Ime Firme:</label>
+              <input type="text" class="form-control" id="customer_company_name" name="customer_company_name">
+          </div>
+  
+          <div class="form-group">
+              <label for="customer_pib">PIB:</label>
+              <input type="text" class="form-control" id="customer_pib" name="customer_pib">
+          </div>
+  
+          <div class="form-group">
+              <label>Servisna kategorija:</label><br>
+              <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="telefoni" name="service_category" value="Telefoni" required>
+                  <label class="form-check-label" for="telefoni">Telefoni</label>
+              </div>
+              <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="racunari" name="service_category" value="Racunari" required>
+                  <label class="form-check-label" for="racunari">Racunari</label>
+              </div>
+              <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="ostalo" name="service_category" value="Ostalo" required>
+                  <label class="form-check-label" for="ostalo">Ostalo</label>
+              </div>
+          </div>
+  
+          <div class="form-group">
+              <label for="brand">Brand:</label>
+              <input type="text" class="form-control" id="brand" name="brand" required>
+          </div>
+  
+          <div class="form-group">
+              <label for="model">Model:</label>
+              <input type="text" class="form-control" id="model" name="model" required>
+          </div>
+  
+          <div class="form-group">
+              <label for="imei">IMEI/Serial:</label>
+              <input type="text" class="form-control" id="imei" name="imei">
+          </div>
+  
+          <div class="form-group">
+              <label for="comment">Opis Kvara:</label>
+              <input type="text" class="form-control" id="comment" name="comment" required>
+          </div>
+  
+          <input type="hidden" id="ticket_status" name="ticket_status" value="Open">
+  
+          <div class="form-group">
+              <label for="sales_price">Okvirna cena:</label>
+              <input type="text" class="form-control" id="sales_price" name="sales_price" required>
+          </div>
+  
+          <div class="form-group">
+              <label for="priority">Prioritet:</label>
+              <select class="form-control" id="priority" name="priority">
+                  <option value="Normal" selected>Normal</option>
+                  <option value="Urgent">Urgent</option>
+              </select>
+          </div>
+  
+          <div class="form-group">
+              <label for="assigned_technician">Serviser:</label>
+              <select class="form-control" id="assigned_technician" name="assigned_technician" required>
+                  {% for technician in technicians %}
+                  <option value="{{ technician.name }}">{{ technician.name }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+  
+           
+          <div class="form-group">
+              <label for="service_location">Servisna Lokacija:</label>
+              <select class="form-control" id="service_location" name="service_location" required>
+                  {% for location in service_locations %}
+                  <option value="{{ location.id }}">{{ location.name }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+  
+          <button type="submit" class="btn btn-primary"style="margin-top: 20px;">Dodaj nalog</button>
+      </form>
+  </div>
+</div>
+<div class="col-md-8">
+  <div class="container mt-8 shadow">
+    <h1 class="mt-5">Otvoreni Servsni nalozi {{ open_tickets_count }}  Ukupna suma {{ open_tickets_sales_sum }}€</h1>
 
-      <label for="customer_contact">Customer Contact:</label>
-      <input
-        type="text"
-        id="customer_contact"
-        name="customer_contact"
-        required
-      /><br />
-
-      <label for="customer_email">Customer Email:</label>
-      <input type="email" id="customer_email" name="customer_email" /><br />
-
-      <label for="customer_company_name">Customer Company Name:</label>
-      <input
-        type="text"
-        id="customer_company_name"
-        name="customer_company_name"
-      /><br />
-
-      <label for="customer_pib">Customer PIB:</label>
-      <input type="text" id="customer_pib" name="customer_pib" /><br />
-
-      <label>Service Category:</label><br />
-      <input
-        type="checkbox"
-        id="telefoni"
-        name="service_category"
-        value="Telefoni"
-        required
-      />
-      Telefoni<br />
-      <input
-        type="checkbox"
-        id="racunari"
-        name="service_category"
-        value="Racunari"
-        required
-      />
-      Racunari<br />
-      <input
-        type="checkbox"
-        id="ostalo"
-        name="service_category"
-        value="Ostalo"
-        required
-      />
-      Ostalo<br />
-
-      <label for="brand">Brand:</label>
-      <input type="text" id="brand" name="brand" required /><br />
-
-      <label for="model">Model:</label>
-      <input type="text" id="model" name="model" required /><br />
-
-      <label for="imei">IMEI/Serial:</label>
-      <input type="text" id="imei" name="imei" /><br />
-
-      <label for="comment">Comment:</label>
-      <input type="text" id="comment" name="comment" required /><br />
-
-      <input
-        type="hidden"
-        id="ticket_status"
-        name="ticket_status"
-        value="Open"
-      />
-
-      <label for="sales_price">Sales Price:</label>
-      <input type="text" id="sales_price" name="sales_price" required /><br />
-
-      <label for="priority">Priority:</label>
-      <select id="priority" name="priority">
-        <option value="Normal" selected>Normal</option>
-        <option value="Urgent">Urgent</option>
-      </select>
-
-      <br />
-
-      <label for="assigned_technician">Assigned Technician name:</label>
-      <select id="assigned_technician" name="assigned_technician" required>
-          {% for technician in technicians %}
-          <option value="{{ technician.name }}">{{ technician.name }}</option>
-          {% endfor %}
-      </select><br />
-      
-      
-
-      <label for="attachments">Attachments:</label>
-      <input type="file" id="attachments" name="attachments" /><br />
-
-      <label for="service_location">Service Location:</label>
-      <select id="service_location" name="service_location" required>
-        {% for location in service_locations %}
-        <option value="{{ location.id }}">{{ location.name }}</option>
-        {% endfor %}</select
-      ><br />
-
-      <input type="submit" value="Add Service Ticket" />
-    </form>
-
-    <h1>Active Service Tickets {{ open_tickets_count }}  Ukupna suma {{ open_tickets_sales_sum }}</h1>
-
-    <table>
+    <table class="table">
       <thead>
         <tr>
           <th>Ticket Number</th>
           <th>Date</th>
           <th>Customer Name</th>
+          <th>Kontakt tel</th>
           <th>Service Section</th>
           <th>Brand</th>
           <th>Model</th>
@@ -139,6 +226,7 @@
           <td>{{ ticket.service_ticket_nr }}</td>
           <td>{{ ticket.date }}</td>
           <td>{{ ticket.customer_name }}</td>
+          <td>{{ ticket.customer_contact }}</td>
           <td>{{ ticket.service_section }}</td>
           <td>{{ ticket.brand }}</td>
           <td>{{ ticket.model }}</td>
@@ -166,9 +254,10 @@
         {% endfor %}
       </tbody>
     </table>
-
-    <h1>Completed Service Tickets (nenaplaćeno) {{ closed_not_collected_tickets_count }} Ukupna suma {{ closed_tickets_sales_sum }}</h1>
-    <table>
+</div>
+<div class="container mt-5 shadow">
+    <h1>Završeni Servisni nalozi (nenaplaćeno) {{ closed_not_collected_tickets_count }} Ukupna suma {{ closed_tickets_sales_sum }}€</h1>
+    <table class="table">
       <thead>
         <tr>
           <th>Ticket Number</th>
@@ -213,6 +302,13 @@
         {% endfor %}
       </tbody>
     </table>
+  </div>
+  </div>
+  </div>
+  </body>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
       var checkboxes = document.querySelectorAll(
         'input[name="service_category"]'
@@ -411,5 +507,6 @@ collectButtons.forEach((button) => {
       });
   });
 </script>
+ 
 
 </html>
