@@ -1,143 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"
-      rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css"
+        rel="stylesheet"
     />
     <link
-      href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap5.css"
-      rel="stylesheet"
+        href="https://cdn.datatables.net/2.0.0/css/dataTables.bootstrap5.css"
+        rel="stylesheet"
     />
 
     <title>Printable Ticket</title>
     <style>
-      /* Define your CSS styles for the printable ticket here */
-      body {
-        font-family: Arial, sans-serif;
-      }
-      .ticket-container {
-        width: 80%;
-        margin: 0 auto;
-      }
-      .ticket-header {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .ticket-details {
-        border: 1px solid #ccc;
-        padding: 20px;
-        margin-bottom: 20px;
-      }
-      .ticket-details h2 {
-        margin-top: 0;
-      }
-      .ticket-details p {
-        margin: 5px 0;
-      }
+        /* Define your CSS styles for the printable ticket here */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .ticket-container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .ticket-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .ticket-details {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .ticket-details h3 {
+            margin-top: 0;
+        }
+        .ticket-details p {
+            margin: 5px 0;
+        }
+        .company-logo img {
+            width: 12%;
+            height: auto;
+        }
+        .company-header {
+            text-align: center; /* Align content center */
+        }
+
+        .table th {
+            font-weight: normal; /* Make th elements not bold */
+        }
+        .table td {
+            font-weight: bold; /* Make td elements bold */
+        }
+
+        /* Media query for adjusting font size for printing */
+        @media print {
+            body {
+                font-size: 10pt; /* Set font size to 10pt for printing */
+            }
+            .print-font-size-5 {
+                font-size: 5pt; /* Define font size 5 for printing */
+            }
+            table {
+                font-size: 10pt; /* Set font size of table to 10pt for printing */
+            }
+        }
     </style>
-  </head>
-  <body>
-    <div class="row">
-      <div class="col-md-4">
+</head>
+<body>
+<div class="row">
+    <div class="col-md-6">
         <div class="ticket-container">
-          <header class="company-header" style="text-align: center">
-            <div class="company-logo">
-              <img
-                src="/static/images/dolce_vita_logo.png"
-                alt="Company Logo"
-                style="width: 12%; height: auto"
-              />
+            <header class="company-header">
+                <div class="company-logo">
+                    <img
+                        src="/static/images/dolce_vita_logo.png"
+                        alt="Company Logo"
+                    />
+                </div>
+                <div class="company-info" ">
+                    <h3>Dolce Vita servis i usluge</h3>
+                    <p>Pavla Vuisica 44 Zemun Altina</p>
+                    <p>0649090060</p>
+                </div>
+            </header>
+            <div class="ticket-header">
+                <h3>Servisni nalog</h3>
             </div>
-            <div class="company-info">
-              <h1>Dolce Vita servis i usluge</h1>
-              <p>Pavla Vuisica 44 Zemun Altina</p>
-              <p>0649090060</p>
+
+            <div class="ticket-details" ">
+                <table class="table">
+                    <tbody>
+                    <!-- First Section -->
+                    <tr>
+                        <th scope="row">Broj Naloga:</th>
+                        <td>{{ ticket.service_ticket_nr }}</td>
+                        <th scope="row">Kategorija:</th>
+                        <td>{{ ticket.service_section }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Datum prijema:</th>
+                        <td>{{ ticket.date }}</td>
+                        <th scope="row">Brand:</th>
+                        <td>{{ ticket.brand }}</td>
+                        <th scope="row">Serviser:</th>
+                        <td>{{ ticket.assigned_technician }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Ime i prezime mušterije:</th>
+                        <td>{{ ticket.customer_name }}</td>
+                        <th scope="row">Model:</th>
+                        <td>{{ ticket.model }}</td>
+                        <th scope="row">Prioritet:</th>
+                        <td>{{ ticket.priority }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Kontakt telefon:</th>
+                        <td>{{ ticket.customer_contact }}</td>
+                        <th scope="row">Opis kvara:</th>
+                        <td>{{ ticket.comment }}</td>
+                        <th scope="row">Okvirna cena:</th>
+                        <td>{{ ticket.sales_price }}</td>
+                    </tr>
+                    <!-- Second Section -->
+                    <!-- Add more ticket details as needed -->
+                    <tr>
+                        <th scope="row">Primio na servis:</th>
+                        <td></td>
+                        <th scope="row">Saglasan sa stanjem:</th>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Predao:</th>
+                        <td></td>
+                        <th scope="row">Preuzeo sa servisa:</th>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p class="print-font-size-5">{{ app.config['COMMENT_CLAUSE'] }}</p>
+                <!-- Additional sections can be added here -->
             </div>
-          </header>
-          <div class="ticket-header">
-            <h1>Servisni nalog</h1>
-          </div>
-          <div class="ticket-details">
-            <h2>Broj Naloga: {{ ticket.service_ticket_nr }}</h2>
-            <p>Datum prijema : {{ ticket.date }}</p>
-            <p>Ime i prezime mušterije: {{ ticket.customer_name }}</p>
-            <p>Kontakt telefon: {{ ticket.customer_contact }}</p>
-            <!-- Add more ticket details as needed -->
-            <p>Servis kategorija: {{ ticket.service_section }}</p>
-            <p>Brand: {{ ticket.brand }}</p>
-            <p>Model: {{ ticket.model }}</p>
-            <p>Opis kvara: {{ ticket.comment }}</p>
-            <p>Status: {{ ticket.ticket_status }}</p>
-            <p>Okvirna cena: {{ ticket.sales_price }}</p>
-            <p>Prioritet: {{ ticket.priority }}</p>
-            <p>Serviser: {{ ticket.assigned_technician }}</p>
-            <h2>Klauzola firme</h2>
-            <p>{{ app.config['COMMENT_CLAUSE'] }}</p>
-            <!-- Add more ticket details as needed -->
-          </div>
         </div>
-      </div>
-      <div class="col-md-4">
-        <div class="ticket-container">
-          <header class="company-header" style="text-align: center">
-            <div class="company-logo">
-              <img
-                src="/static/images/dolce_vita_logo.png"
-                alt="Company Logo"
-                style="width: 12%; height: auto"
-              />
-            </div>
-            <div class="company-info">
-              <h1>Dolce Vita servis i usluge</h1>
-              <p>Pavla Vuisica 44 Zemun Altina</p>
-              <p>0649090060</p>
-            </div>
-          </header>
-          <div class="ticket-header">
-            <h1>Servisni nalog</h1>
-          </div>
-          <div class="ticket-details">
-            <h2>Broj Naloga: {{ ticket.service_ticket_nr }}</h2>
-            <p>Datum prijema : {{ ticket.date }}</p>
-            <p>Ime i prezime mušterije: {{ ticket.customer_name }}</p>
-            <p>Kontakt telefon: {{ ticket.customer_contact }}</p>
-            <!-- Add more ticket details as needed -->
-            <p>Servis kategorija: {{ ticket.service_section }}</p>
-            <p>Brand: {{ ticket.brand }}</p>
-            <p>Model: {{ ticket.model }}</p>
-            <p>Opis kvara: {{ ticket.comment }}</p>
-            <p>Status: {{ ticket.ticket_status }}</p>
-            <p>Okvirna cena: {{ ticket.sales_price }}</p>
-            <p>Prioritet: {{ ticket.priority }}</p>
-            <p>Serviser: {{ ticket.assigned_technician }}</p>
-            <h2>Klauzola firme</h2>
-            <p>{{ app.config['COMMENT_CLAUSE'] }}</p>
-            <!-- Add more ticket details as needed -->
-          </div>
-        </div>
-      </div>
     </div>
-  </body>
-  <script
+</div>
+</body>
+<script
     type="text/javascript"
     src="https://code.jquery.com/jquery-3.7.1.js"
-  ></script>
+></script>
 
-  <script
+<script
     type="text/javascript"
     src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"
-  ></script>
+></script>
 
-  <script
+<script
     type="text/javascript"
     src="https://cdn.datatables.net/2.0.0/js/dataTables.js"
-  ></script>
+></script>
 
-  <script
+<script
     type="text/javascript"
     src="https://cdn.datatables.net/2.0.0/js/dataTables.bootstrap5.js"
-  ></script>
+></script>
 </html>
