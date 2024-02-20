@@ -189,7 +189,7 @@
               <label for="service_location">Servisna Lokacija:</label>
               <select class="form-control" id="service_location" name="service_location" required>
                   {% for location in service_locations %}
-                  <option value="{{ location.id }}">{{ location.name }}</option>
+                  <option value="{{ location.name }}">{{ location.name }}</option>
                   {% endfor %}
               </select>
           </div>
@@ -216,7 +216,9 @@
           <th>Status</th>
           <th>Okvirna cena</th>
           <th>Open Duration</th>
+          <th></th>
           <th>Actions</th>
+          <th></th>
           <!-- Add more columns as needed -->
         </tr>
       </thead>
@@ -239,6 +241,8 @@
             <button class="complete-button" data-ticket-id="{{ ticket.id }}">
               Complete
             </button>
+          </td>
+          <td>
             <button class="reject-button" data-ticket-id="{{ ticket.id }}">Reject</button>
             {% endif %}
           </td>
@@ -293,6 +297,8 @@
 
           <td>
             <input type="number" id="final-price-{{ ticket.id }}" />
+           </td>
+           <td>
             <button class="collect-button" data-ticket-id="{{ ticket.id }}">
               Collect
             </button>
@@ -306,6 +312,7 @@
   </div>
   </div>
   </body>
+  
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

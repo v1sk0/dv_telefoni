@@ -122,7 +122,6 @@ class ServiceTicket(db.Model):
     assigned_technician = db.Column(db.String(100))  # Technician assigned to the service ticket
     resolution_details = db.Column(db.Text)  # Details of the resolution of the service ticket
     parent_ticket_id = db.Column(db.Integer, db.ForeignKey('service_ticket.id'))  # Service history associated with the ticket
-    attachments = db.Column(db.String(200))  # File paths or URLs to attachments related to the service
     billing_status = db.Column(db.String(20))  # Billing status, e.g., 'Unbilled', 'Billed'
     invoice_number = db.Column(db.String(20))  # Invoice number related to the service
     service_location = db.Column(db.String(100))  # Location where the service was provided
@@ -498,7 +497,6 @@ def add_service_ticket():
     sales_price = request.form['sales_price']
     priority = request.form['priority']
     assigned_technician_name = request.form['assigned_technician']
-    attachments = request.form['attachments']
     service_location_id = request.form['service_location']
 
     # Get the current timestamp
@@ -521,7 +519,6 @@ def add_service_ticket():
         sales_price=sales_price,
         priority=priority,
         assigned_technician=assigned_technician_name,  # Store technician name instead of ID
-        attachments=attachments,
         service_location=service_location_id,
         purchase_timestamp=purchase_timestamp,
        
